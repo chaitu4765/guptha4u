@@ -69,7 +69,7 @@ python tools/prepare_vercel_preview.py data/retail.sqlite3 data/vercel-preview
 
 The bundle contains the storefront, published announcement fields, catalogue products and a search index. ERP users, internal product costs, orders, passwords and checkout databases stay outside the upload. The preview reads its catalogue snapshot and supports browsing, search and a browser-local wishlist. Build a new snapshot to refresh it.
 
-Enable Vercel Authentication with Standard Protection in the preview project before uploading. Run `vercel deploy` from the generated folder and confirm it targets Preview. The staged supplier photos are for the protected client demo.
+Enable Vercel Authentication with Standard Protection. For a new project, deploy a placeholder without catalogue data first. Vercel can assign the first deployment to Production and give it a public alias. Then run `vercel deploy --environment preview` from the generated folder. Confirm the deployment is in Preview and requires authentication before sharing its URL. The staged supplier photos are for the protected client demo.
 
 ## Production demo
 
