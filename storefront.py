@@ -18,6 +18,7 @@ from storefront_checkout import (BODY_LIMIT, CHECKOUT_API, POST_PATHS, demo_path
 import storefront_accounts as accounts
 
 ROOT = Path(__file__).resolve().parent
+CATALOGUE_PREVIEW = os.environ.get('GUPTHA_CATALOGUE_PREVIEW') == '1'
 ASSETS = ROOT / 'public' / 'storefront'
 MEDIA = Path(os.environ.get('GUPTHA_MEDIA', ASSETS / 'media')).resolve()
 BRAND = 'Gupta Art Store and Stationary'
@@ -261,7 +262,7 @@ def layout(title, description, path, content, origin, notice='', noindex=False, 
     markup = ''
     if structured:
         markup = '<script type="application/ld+json">' + json.dumps(structured).replace('<', r'\u003c') + '</script>'
-    robots = '<meta name="robots" content="noindex,follow">' if noindex else ''
+    robots = '<meta name="robots" content="noindex,follow">' if noindex or CATALOGUE_PREVIEW else ''
     navigation = nav_links(products, True)
     member_link = '<a href="/shop/privilege">Privilege membership</a>' if demo else ''
     return f'''<!doctype html>
@@ -287,7 +288,7 @@ def layout(title, description, path, content, origin, notice='', noindex=False, 
 <script type="module" src="/storefront/vendor/storefront.js"></script>
 {markup}
 </head>
-<body>
+<body{' data-catalogue-preview' if CATALOGUE_PREVIEW else ''}>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-header">
 <div class="wrap mast">
@@ -310,6 +311,7 @@ def layout(title, description, path, content, origin, notice='', noindex=False, 
   </div>
 </div>
 </header>
+{'<p class="catalogue-preview-note">Catalogue preview · Browse materials and search the demo range.</p>' if CATALOGUE_PREVIEW else ''}
 <div data-store-announcement>{notice}</div>
 <main id="main">{content}</main>
 <div data-meadow-footer data-demo-checkout="{int(demo)}"><footer class="site-footer meadow-fallback">
@@ -1038,7 +1040,11 @@ def application(environ, start_response):
     origin = os.environ.get('GUPTHA_PUBLIC_ORIGIN', 'http://127.0.0.1:8080').rstrip('/')
     method, path = environ['REQUEST_METHOD'], environ['PATH_INFO']
     raw_cookies = environ.get('HTTP_COOKIE', '')
-    if path in ACCOUNT_PAGES or path.startswith('/shop/auth/'):
+    if CATALOGUE_PREVIEW and (method not in {'GET', 'HEAD'} or path in ACCOUNT_PAGES
+                              or path in {'/shop/cart', '/shop/checkout', '/shop/privilege'}
+                              or path.startswith('/shop/auth/')):
+        result = response(404, 'This route is unavailable in the catalogue preview.', 'text/plain')
+    elif path in ACCOUNT_PAGES or path.startswith('/shop/auth/'):
         try:
             result = storefront_account_response(
                 path, method, environ.get('QUERY_STRING', ''), origin, raw_cookies, environ.get('HTTP_ORIGIN'),

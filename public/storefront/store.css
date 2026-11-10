@@ -80,6 +80,9 @@ img { display: block; width: 100%; height: auto; }
 .announcement-inner p { flex: 1 1 230px; overflow-wrap: anywhere; }
 .announcement-link { display: inline-flex; align-items: center; gap: 7px; min-height: 38px; font-weight: 700; text-decoration: none; }
 .announcement-link .icon { width: 16px; height: 16px; }
+.catalogue-preview-note { background: var(--color-accent-soft); color: var(--color-ink); padding: 8px var(--gutter); text-align: center; font-size: 13px; }
+[data-catalogue-preview] :is(.utilities a[href="/shop/account"], .utilities .bag, .card-add,
+  .purchase > label, .purchase > button[type="submit"]) { display: none; }
 @media (max-width: 580px) {
   .announcement-inner { gap: 0 16px; padding-block: 9px; }
   .announcement-inner p { flex-basis: 100%; }

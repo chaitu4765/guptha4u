@@ -59,6 +59,18 @@ Python serves the storefront. React and TypeScript components live in `component
 
 For a standalone shadcn version, run `npx shadcn@latest init -t vite` in a separate folder and select the React TypeScript Vite setup. The scaffold configures Tailwind. For an existing Vite frontend, install `tailwindcss` and `@tailwindcss/vite`, register the Tailwind Vite plugin, add `@import "tailwindcss";` to the app stylesheet, then run `npx shadcn@latest init`. Set `@` to the source root in Vite and TypeScript and place the components in `src/components/ui` when using the `src` layout. This lets generated and hand-authored components use the same `@/components/ui` import path. Port the scoped CSS and Gupta’s design tokens along with the TSX.
 
+## Protected Vercel catalogue preview
+
+Build the upload in a fresh folder inside `data/`.
+
+```powershell
+python tools/prepare_vercel_preview.py data/retail.sqlite3 data/vercel-preview
+```
+
+The bundle contains the storefront, published announcement fields, catalogue products and a search index. ERP users, internal product costs, orders, passwords and checkout databases stay outside the upload. The preview reads its catalogue snapshot and supports browsing, search and a browser-local wishlist. Build a new snapshot to refresh it.
+
+Enable Vercel Authentication with Standard Protection in the preview project before uploading. Run `vercel deploy` from the generated folder and confirm it targets Preview. The staged supplier photos are for the protected client demo.
+
 ## Production demo
 
 Run one instance of the public WSGI app on a host with persistent local disk. Run the ERP separately on loopback for private administration over SSH or a private network. Point both processes at the same persistent database and media folder. With demo checkout disabled, the public WSGI process opens the inventory database read-only. The public proxy connects to Waitress on port 8080. Keep the ERP's port 8090 private.
