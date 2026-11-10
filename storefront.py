@@ -13,7 +13,7 @@ import sqlite3
 import unicodedata
 from urllib.parse import parse_qs, urlencode, urlsplit
 from storefront_search import search_ids
-from storefront_checkout import (BODY_LIMIT, POST_PATHS, demo_path, submit_demo,
+from storefront_checkout import (BODY_LIMIT, CHECKOUT_API, POST_PATHS, demo_path, submit_demo,
                                  DELIVERY_FEE, MEMBER_PERCENT, MEMBER_PRICE, QUALIFYING_SPEND, customer_orders)
 import storefront_accounts as accounts
 
@@ -84,8 +84,6 @@ def product_image(value):
 def catalogue_product(row):
     p = dict(row)
     p['id'] = str(p['id'])
-    p['demo_quantity'] = bool(p['source_available'] and not p['stock'])
-    p['stock'] = p['stock'] if p['source_available'] is None else (max(1, p['stock']) if p['source_available'] else 0)
     p['discount'] = ((p['mrp'] - p['price']) * 100 // p['mrp']) if p['mrp'] > p['price'] else 0
     return p
 
@@ -487,7 +485,7 @@ def category_overview(products, key, groups):
         'This shelf is empty', 'The ERP catalogue has no products for this collection.')) + '</div>'
 
 
-def listing(path, params, products, key=None, ranked=None, groups=None):
+def listing(path, params, products, key=None, ranked=None, groups=None, facets=None):
     label, intro = CATEGORIES[key] if key else ('All materials', 'Browse the store’s art supplies and stationery.')
     if key:
         products = [p for p in products if in_category(p, key)]
@@ -504,8 +502,9 @@ def listing(path, params, products, key=None, ranked=None, groups=None):
             for group, kind in category_paths(p, key))]
     leaves = groups.get(selected, {}) if selected else dict.fromkeys(
         name for names in groups.values() for name in names)
-    labels = sorted({p['category'] for p in products if p['category']}, key=str.casefold)
-    brands = sorted({p['brand'] for p in products if p['brand']}, key=str.casefold)
+    facet_products = products if facets is None else facets
+    labels = sorted({p['category'] for p in facet_products if p['category']}, key=str.casefold)
+    brands = sorted({p['brand'] for p in facet_products if p['brand']}, key=str.casefold)
     brand = params.get('brand', [''])[0]
     query = params.get('q', [''])[0].strip()[:100]
     category = params.get('category', [''])[0][:500]
@@ -591,12 +590,11 @@ def detail(p, products):
     <p>{escape(p['brand'])} {escape(p['variant'])}</p>
     <p>{stock_label(p)} <span class="sku">SKU {escape(p["source_sku"] or p["sku"])}</span></p>
     {desc}
-    {'<p class="reference-price">Available to try in the demo cart, one per product.</p>' if p['demo_quantity'] else ''}
     {f'<p class="reference-price">Demo price checked {escape(p["reference_date"])}. <a href="{escape(p["reference_url"])}" rel="noopener">Price reference</a></p>' if p['reference_url'] else ''}
     {f'<p class="image-credit">Image source {escape(p["image_source"])}. {escape(p["image_license"])}</p>' if p['image'] != PLACEHOLDER else ''}
     <form class="purchase" data-add="{p["id"]}">
       <label>Quantity<input type="number" name="quantity" min="1" max="{cap}" value="1" required{disabled}></label>
-      <button class="button"{disabled}>Add to cart {icon("bag")}</button>
+      <button class="button" type="submit"{disabled}>Add to cart {icon("bag")}</button>
       {save_button(p)}
     </form>
     <p id="add-message" class="cart-note"></p>
@@ -718,14 +716,19 @@ def storefront_demo_post(path, size, source, content_type, origin, read, connect
     if not 0 < size <= BODY_LIMIT:
         return json_response({'error': 'The checkout form is empty or too large.'}, 413)
 
-    def load_products(ids):
+    def load_products(ids, transaction=None):
         marks = ','.join('?' for _ in ids)
+        if transaction is not None:
+            rows = transaction.execute(f'SELECT {PRODUCT_FIELDS}, tax FROM inventory.products WHERE archived=0 AND id IN ({marks})', tuple(ids))
+            return {str(row['id']): public_product(catalogue_product(row)) for row in rows}
         with closing(connect()) as c:
             rows = c.execute(f'SELECT {PRODUCT_FIELDS}, tax FROM products WHERE archived=0 AND id IN ({marks})', tuple(ids))
             return {str(row['id']): public_product(catalogue_product(row)) for row in rows}
 
     try:
         account = accounts.current_account(raw_cookies)
+        if path == CHECKOUT_API and not account:
+            return json_response({'error': 'Sign in to place your order.'}, 401)
         return json_response(submit_demo(path, read(size), load_products, account['id'] if account else None))
     except ValueError as error:
         return json_response({'error': str(error)}, 400)
@@ -737,8 +740,22 @@ ACCOUNT_PAGES = {'/shop/sign-in', '/shop/sign-up', '/shop/account'}
 ACCOUNT_CALLBACK = re.compile(r'/shop/auth/(google|apple)(/callback)?')
 
 
+def navigation_products(connection):
+    return [dict(row) for row in connection.execute('''SELECT DISTINCT category,subcategory,brand,catalogue_groups,
+        CASE WHEN catalogue_groups='[]' THEN name ELSE '' END AS name FROM products WHERE archived=0''')]
+
+
+def account_return(value):
+    if (len(value) <= 1000 and not any(ord(char) < 32 or ord(char) == 127 for char in value)
+            and '\\' not in value and re.fullmatch(r'/shop(?:/?|/(?:cart|checkout|catalogue|wishlist|privilege|category/[a-z-]+|product/[a-z0-9-]+))(?:\?[^#]*)?', value)):
+        return value
+    return '/shop/account'
+
+
 def storefront_account_response(path, method, query, origin, raw_cookies, source, content_type, size, read, connect):
-    private = [('Cache-Control', 'no-store'), ('Referrer-Policy', 'no-referrer')]
+    private = [('Cache-Control', 'no-store'), ('Referrer-Policy', 'same-origin')]
+    if path == '/shop/auth/session' and method == 'GET':
+        return json_response({'signed_in': accounts.current_account(raw_cookies) is not None})
     if path == '/shop/auth/sign-out':
         if method != 'POST' or source != origin:
             return response(403, 'Sign out from your account page.', 'text/plain', private)
@@ -772,19 +789,32 @@ def storefront_account_response(path, method, query, origin, raw_cookies, source
         return response(303, '', headers=[*headers, ('Location', '/shop/account'), ('Set-Cookie', session)])
     if path not in ACCOUNT_PAGES:
         return None
-    if method not in {'GET', 'HEAD'}:
+    demo_email = accounts.demo_credentials_enabled(origin)
+    params = parse_qs(query)
+    next_page = account_return(params.get('next', [''])[0])
+    error = ''
+    if method == 'POST' and demo_email and path != '/shop/account':
+        if source != origin:
+            return response(403, 'Open the account form from the storefront address.', 'text/plain', private)
+        try:
+            length = int(size or 0)
+            if not 0 < length <= 8192 or content_type.partition(';')[0] != 'application/x-www-form-urlencoded':
+                raise ValueError('Send a valid account form.')
+            fields = parse_qs(read(length).decode())
+            session = accounts.email_session(path.endswith('/sign-up'), fields, raw_cookies, origin)
+            return response(303, '', headers=[*private, ('Location', next_page), ('Set-Cookie', session)])
+        except (ValueError, UnicodeError) as exc:
+            error = str(exc)
+    if method not in {'GET', 'HEAD'} and not error:
         return response(405, 'Method not allowed', 'text/plain', [*private, ('Allow', 'GET, HEAD')])
     account = accounts.current_account(raw_cookies)
     if path == '/shop/account' and not account:
         return response(303, '', headers=[*private, ('Location', '/shop/sign-in')])
     if path != '/shop/account' and account:
-        return response(303, '', headers=[*private, ('Location', '/shop/account')])
+        return response(303, '', headers=[*private, ('Location', next_page)])
     demo = demo_path() is not None
     with closing(connect()) as c:
-        products = [dict(row) for row in c.execute(
-            """SELECT DISTINCT category,subcategory,brand,catalogue_groups,
-                      CASE WHEN catalogue_groups='[]' THEN name ELSE '' END AS name
-               FROM products WHERE archived=0""")]
+        products = navigation_products(c)
     if account:
         title = 'Your account'
         identity = escape(account['name'] or account['email'] or account['provider'].capitalize() + ' member')
@@ -803,30 +833,47 @@ def storefront_account_response(path, method, query, origin, raw_cookies, source
     else:
         signup = path.endswith('/sign-up')
         title = 'Create your account' if signup else 'Sign in to Gupta'
-        desc = 'Keep track of your orders and return to your workbench.'
-        actions = ''.join(
-            f'<a class="button outline account-provider" href="/shop/auth/{provider}">Continue with {provider.title()}</a>'
-            if accounts.provider_config(provider, origin) else
-            f'<button class="button outline account-provider" type="button" disabled>Continue with {provider.title()}</button>'
-            for provider in accounts.PROVIDERS)
-        available = all(accounts.provider_config(provider, origin) for provider in accounts.PROVIDERS)
-        status = parse_qs(query).get('status', [''])[0]
-        note = '<p class="account-note">Provider sign-in requires store setup.</p>' if not available else ''
-        if status in {'retry', 'unavailable'}:
-            note = '<p class="account-note" role="alert">Sign-in could not be completed. Please try again.</p>' + note
-        switch = ('Already have an account? <a href="/shop/sign-in">Sign in</a>' if signup else
-                  'New to Gupta? <a href="/shop/sign-up">Create an account</a>')
+        desc = ('Create an account to add materials to your cart and keep track of orders.' if signup else
+                'Pick up where you left off and see your Gupta orders.')
+        redirect_query = '?' + urlencode({'next': next_page}) if next_page != '/shop/account' else ''
+        actions = ''
+        for provider in accounts.PROVIDERS:
+            label = (f'<img src="/storefront/{provider}-sign-in.png" alt="" width="22" height="22">'
+                     f'<span>Continue with {provider.title()}</span>')
+            button = f'account-provider account-provider-{provider}'
+            if accounts.provider_config(provider, origin):
+                actions += f'<a class="{button}" href="/shop/auth/{provider}">{label}</a>'
+            else:
+                actions += f'<button class="{button}" type="button" disabled>{label}</button>'
+        missing = [provider.title() for provider in accounts.PROVIDERS if not accounts.provider_config(provider, origin)]
+        status = params.get('status', [''])[0]
+        if not error and status in {'retry', 'unavailable'}:
+            error = 'Sign-in could not be completed. Please try again.'
+        note = f'<p class="account-note">{" and ".join(missing)} sign-in requires store setup.</p>' if missing else ''
+        alert = f'<p class="account-error" role="alert">{escape(error)}</p>' if error else ''
+        switch = (f'Already have an account? <a href="/shop/sign-in{escape(redirect_query)}">Sign in</a>' if signup else
+                  f'New to Gupta? <a href="/shop/sign-up{escape(redirect_query)}">Create an account</a>')
+        email_form = ''
+        if demo_email:
+            name = '<label>Full name<input name="name" autocomplete="name" maxlength="100" required></label>' if signup else ''
+            email_form = f'''<form class="account-form" action="{path}{escape(redirect_query)}" method="post">
+{name}<label>Email address<input name="email" type="email" autocomplete="username" maxlength="254" required></label>
+<label>Password<input name="password" type="password" autocomplete="{'new-password' if signup else 'current-password'}" minlength="10" maxlength="160" required></label>
+<button class="button" type="submit">{'Create demo account' if signup else 'Sign in with email'}</button>
+{'<p class="account-note">Use sample details and a unique demo password.</p>' if signup else ''}</form>
+<p class="account-divider">Or continue with</p>'''
         content = f'''<section class="wrap account-shell" aria-labelledby="account-heading">
-<div class="account-copy"><h1 id="account-heading">{title}</h1><p>{desc}</p>
-<div class="account-providers">{actions}</div>{note}<p class="account-note">{switch}</p>
-<a class="account-browse" href="/shop/catalogue">Continue browsing</a></div>
-<picture class="account-art"><img src="/storefront/art/studio-v2-brushes.webp" alt="Paintbrushes on the Gupta studio workbench" width="246" height="366"></picture>
+<div class="account-copy"><a class="account-browse" href="/shop/catalogue">{icon('arrow')} Browse materials</a>
+<h1 id="account-heading">{title}</h1><p class="account-intro">{desc}</p>{alert}{email_form}
+<div class="account-providers">{actions}</div>{note}<p class="account-switch">{switch}</p></div>
+<figure class="account-art"><img src="/storefront/art/studio-v2.webp" alt="Brushes and canvases on the sunlit Gupta workbench" width="2172" height="724">
+<figcaption>Gupta Art Store <span>Since 1916</span></figcaption></figure>
 </section>'''
-    return response(200, layout(title, 'Your Gupta store account.', path, content, origin,
+    return response(400 if error and method == 'POST' else 200, layout(title, 'Your Gupta store account.', path, content, origin,
                     noindex=True, products=products, demo=demo), headers=private)
 
 
-def storefront_response(path, query, connect, origin):
+def storefront_response(path, query, connect, origin, raw_cookies=''):
     """Return None for routes owned by the local ERP."""
     if path.startswith('/storefront/'):
         relative = path.removeprefix('/storefront/')
@@ -854,6 +901,9 @@ def storefront_response(path, query, connect, origin):
         return None
     if len(query) > 6500:
         return json_response({'error':'Query is too long.'}, 400)
+    if path == '/shop/checkout' and demo_path() and not accounts.current_account(raw_cookies):
+        return response(303, '', headers=[('Cache-Control', 'no-store'),
+                        ('Location', '/shop/sign-up?' + urlencode({'next': path}))])
     params = parse_qs(query)
     if path == '/api/storefront/products':
         ids = params.get('ids', [''])[0]
@@ -880,8 +930,14 @@ def storefront_response(path, query, connect, origin):
                 matches = [{key: product[key] for key in ('id', 'name', 'url', 'image')} for product in matches]
             return json_response({'products':matches})
         ranked = {pid: index for index, pid in enumerate(search_ids(c, query_text))} if query_text else None
+        nav_products = None
+        where, args = '', ()
+        if path == SHOP + '/catalogue' and ranked is not None and len(ranked) <= 1000:
+            nav_products = navigation_products(c)
+            args = tuple(ranked)
+            where = ' AND id IN (' + ','.join('?' for _ in args) + ')' if args else ' AND 0'
         products = [catalogue_product(row) for row in c.execute(
-            f'SELECT {PRODUCT_FIELDS} FROM products WHERE archived=0 ORDER BY name COLLATE NOCASE, id')]
+            f'SELECT {PRODUCT_FIELDS} FROM products WHERE archived=0{where} ORDER BY name COLLATE NOCASE, id', args)]
         notice = announcement(c)
     if path == '/sitemap.xml':
         paths = [SHOP, SHOP + '/catalogue', SHOP + '/about', SHOP + '/privacy', SHOP + '/refunds']
@@ -912,7 +968,7 @@ def storefront_response(path, query, connect, origin):
         if key:
             content, page = studio_page(products, key, params, ranked)
         else:
-            content, page = listing(path, params, products, ranked=ranked)
+            content, page = listing(path, params, products, ranked=ranked, facets=nav_products)
         if page > 1 and not noindex:
             canonical += ('&' if '?' in canonical else '?') + 'page=' + str(page)
         schema = breadcrumb_schema(origin, (canonical, title))
@@ -938,7 +994,7 @@ def storefront_response(path, query, connect, origin):
         content = f'''<section class="wrap page prose">{trail(title)}<h1>{title}</h1>
 <p>This policy describes how this Gupta storefront demo handles the information you share.</p>
 <h2>Browsing and shopping</h2><p>Your cart and wishlist are saved in this browser. You can clear them through your browser’s site settings. Search terms and availability checks go to the storefront server.</p>
-<h2>Account and demo checkout</h2><p>If you sign in through Google or Apple, the storefront uses the provider’s account identifier and the email address it shares to create your account. A session cookie keeps you signed in. Demo orders store the sample contact and fulfillment details you submit.</p>
+<h2>Account and demo checkout</h2><p>If you sign in through Google or Apple, the storefront uses the provider’s account identifier and the email address it shares to create your account. Local demo accounts store the name and email you enter and a salted password hash. A session cookie keeps you signed in. Demo orders store the sample contact and fulfillment details you submit.</p>
 <h2>WhatsApp messages</h2><p>When you open a WhatsApp draft, the request or order details in the draft go to WhatsApp. You can review and edit the draft before sending it to the store.</p></section>'''
     elif path == SHOP + '/refunds':
         title = 'Refund policy'
@@ -965,7 +1021,8 @@ def storefront_response(path, query, connect, origin):
         else:
             title, status, noindex = 'Page not found', 404, True
             content = '<section class="wrap page">' + empty(title, 'This page or product is no longer available.') + '</section>'
-    return response(status, layout(title, desc, canonical, content, origin, notice, noindex, schema, products, demo),
+    return response(status, layout(title, desc, canonical, content, origin, notice, noindex, schema,
+                                   products if nav_products is None else nav_products, demo),
                     headers=[('Cache-Control','no-cache')])
 
 
@@ -999,7 +1056,7 @@ def application(environ, start_response):
         result = response(302, '', headers=[('Location', SHOP)])
     else:
         try:
-            result = storefront_response(path, environ.get('QUERY_STRING', ''), read_catalogue, origin)
+            result = storefront_response(path, environ.get('QUERY_STRING', ''), read_catalogue, origin, raw_cookies)
         except sqlite3.DatabaseError:
             result = response(503, 'Catalogue temporarily unavailable. Please try again.', 'text/plain')
         if result is None:

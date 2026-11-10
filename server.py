@@ -1,5 +1,5 @@
 """Guptha Arts: local single-business retail ERP. Python standard library only."""
-import os, json, sqlite3, secrets, hashlib, hmac, time, csv, io, re
+import os, json, sqlite3, secrets, hashlib, hmac, time, csv, io, re, sys
 from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
@@ -152,7 +152,7 @@ class Handler(BaseHTTPRequestHandler):
         path=url.path
         if path in ACCOUNT_PAGES or path.startswith('/shop/auth/'):
             return self.send_account(url)
-        response = storefront_response(path, url.query, connect, self.storefront_origin())
+        response = storefront_response(path, url.query, connect, self.storefront_origin(), self.headers.get('Cookie',''))
         if response:
             return self.send_storefront(response)
         with connect() as c:
@@ -384,6 +384,9 @@ class Handler(BaseHTTPRequestHandler):
             print(type(e).__name__,str(e)); return self.send({'error':'Unable to complete this operation. Please try again.'},500)
 
 if __name__=='__main__':
+    if '--demo' in sys.argv[1:]:
+        os.environ.setdefault('GUPTHA_DEMO_CHECKOUT_DB', str(DB.with_name(DB.stem + '-demo-orders.sqlite3')))
+        os.environ.setdefault('GUPTHA_ACCOUNTS_DB', str(DB.with_name(DB.stem + '-demo-accounts.sqlite3')))
     init(); port=int(os.environ.get('PORT','8090'))
     print(f'Guptha Arts running at http://127.0.0.1:{port}',flush=True)
     ThreadingHTTPServer(('127.0.0.1',port),Handler).serve_forever()

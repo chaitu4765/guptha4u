@@ -1,4 +1,4 @@
-"""Opt-in demo orders and Privilege enrollment, isolated from the ERP ledger."""
+"""Opt-in demo orders, Privilege enrollment and shared inventory updates."""
 from contextlib import closing
 from datetime import datetime, timezone
 from decimal import Decimal, ROUND_HALF_UP
@@ -33,12 +33,16 @@ def demo_path():
     return Path(setting).resolve() if setting else None
 
 
+def catalogue_path():
+    return Path(os.environ.get('GUPTHA_DB', Path(__file__).parent / 'data/retail.sqlite3')).resolve()
+
+
 def connect_demo():
     path = demo_path()
-    catalogue = Path(os.environ.get('GUPTHA_DB', Path(__file__).parent / 'data/retail.sqlite3')).resolve()
+    catalogue = catalogue_path()
     if path is None or path == catalogue or (path.exists() and catalogue.exists() and path.samefile(catalogue)):
         raise sqlite3.OperationalError('A separate demo checkout database is required.')
-    conn = sqlite3.connect(path, timeout=5)
+    conn = sqlite3.connect(path, timeout=5, uri=True)
     conn.row_factory = sqlite3.Row
     try:
         conn.executescript("""
@@ -174,6 +178,12 @@ def submit_demo(path, raw, load_products, account_id=None):
         if not re.fullmatch(r'[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}', request_key):
             raise ValueError('Refresh the page to start a new checkout.')
         fingerprint = digest({'account': account_id, 'order': data}) if account_id else digest(data)
+        if path == CHECKOUT_API:
+            conn.execute('ATTACH DATABASE ? AS inventory', (catalogue_path().as_uri() + '?mode=rw',))
+            # SQLite commits changes to both files atomically with rollback journals.
+            if any(conn.execute(f'PRAGMA {db}.journal_mode').fetchone()[0] not in ('delete', 'truncate', 'persist')
+                   for db in ('main', 'inventory')):
+                raise sqlite3.OperationalError('Demo checkout requires rollback journals.')
         conn.execute('BEGIN IMMEDIATE')
         existing = conn.execute('SELECT fingerprint,data FROM demo_orders WHERE request_key=?',
                                 (request_key,)).fetchone()
@@ -182,7 +192,7 @@ def submit_demo(path, raw, load_products, account_id=None):
                 raise ValueError('Start a new review before placing a different order.')
             return json.loads(existing['data'])['receipt']
         if path == CHECKOUT_API:
-            quote, customer = checkout_quote(conn, data, load_products)
+            quote, customer = checkout_quote(conn, data, lambda ids: load_products(ids, conn))
             if data.get('review') != digest(quote):
                 raise ValueError('Your order changed. Review the updated total before placing it.')
             contact = customer['contact']
@@ -199,6 +209,15 @@ def submit_demo(path, raw, load_products, account_id=None):
             paid = True
             kind = 'Privilege card'
         reference = 'GD-' + secrets.token_hex(8).upper()
+        if paid and path == CHECKOUT_API:
+            for line in quote['lines']:
+                quantity, product_id = line['quantity'], line['id']
+                updated = conn.execute('''UPDATE inventory.products SET stock=stock-?
+                    WHERE id=? AND archived=0 AND stock>=?''', (quantity, product_id, quantity))
+                if updated.rowcount != 1:
+                    raise ValueError('A material or quantity is no longer available. Review your cart.')
+                conn.execute('INSERT INTO inventory.movements(created,product_id,delta,reason) VALUES(?,?,?,?)',
+                             (created, product_id, -quantity, f'Demo storefront payment {reference}'))
         receipt = {'reference': reference, 'paid': paid, 'total': quote['total'],
                    'payment': PAYMENTS[quote['payment']], 'card': card}
         if paid:

@@ -1,7 +1,8 @@
 """Customer sessions and provider login for the storefront."""
 from contextlib import closing
 from functools import lru_cache
-from hashlib import sha256
+from hashlib import pbkdf2_hmac, sha256
+from hmac import compare_digest
 from http.cookies import CookieError, SimpleCookie
 import importlib.util
 import json
@@ -60,6 +61,11 @@ def provider_config(name, origin):
     return None
 
 
+def demo_credentials_enabled(origin):
+    return (urlsplit(origin).hostname in {'localhost', '127.0.0.1', '::1'}
+            and bool(os.environ.get('GUPTHA_ACCOUNTS_DB') and os.environ.get('GUPTHA_DEMO_CHECKOUT_DB')))
+
+
 def connect_accounts():
     path = Path(os.environ['GUPTHA_ACCOUNTS_DB']).resolve()
     catalogue = Path(os.environ.get('GUPTHA_DB', Path(__file__).parent / 'data/retail.sqlite3')).resolve()
@@ -77,6 +83,10 @@ def connect_accounts():
             );
             CREATE TABLE IF NOT EXISTS customer_sessions (
                 token TEXT PRIMARY KEY, account_id TEXT NOT NULL, expires INTEGER NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS customer_passwords (
+                account_id TEXT PRIMARY KEY REFERENCES customers_online(id),
+                salt TEXT NOT NULL, hash TEXT NOT NULL
             );
             CREATE TABLE IF NOT EXISTS customer_login_states (
                 state TEXT PRIMARY KEY, binding TEXT NOT NULL, provider TEXT NOT NULL,
@@ -98,6 +108,46 @@ def current_account(raw):
             JOIN customer_sessions s ON s.account_id=a.id WHERE s.token=? AND s.expires>?''',
                            (digest(token), int(time.time()))).fetchone()
     return dict(row) if row else None
+
+
+def start_session(conn, account_id, raw, origin):
+    token = secrets.token_urlsafe(32)
+    now = int(time.time())
+    previous = cookies(raw).get(SESSION_COOKIE, '')
+    conn.execute('DELETE FROM customer_sessions WHERE expires<=? OR token=?', (now, digest(previous)))
+    conn.execute('INSERT INTO customer_sessions VALUES(?,?,?)', (digest(token), account_id, now + SESSION_AGE))
+    return cookie(SESSION_COOKIE, token, origin, SESSION_AGE)
+
+
+def email_session(signup, fields, raw, origin):
+    email = fields.get('email', [''])[0].strip().casefold()
+    password = fields.get('password', [''])[0]
+    name = fields.get('name', [''])[0].strip()
+    if len(email) > 254 or not re.fullmatch(r'[^@\s]+@[^@\s]+\.[^@\s]+', email):
+        raise ValueError('Enter a valid email address.')
+    if not 10 <= len(password) <= 160:
+        raise ValueError('Use a password with 10 to 160 characters.')
+    if signup and (not 1 <= len(name) <= 100 or any(ord(char) < 32 for char in name)):
+        raise ValueError('Enter your name.')
+    with closing(connect_accounts()) as conn, conn:
+        if signup:
+            account_id = secrets.token_hex(16)
+            salt = secrets.token_hex(16)
+            value = pbkdf2_hmac('sha256', password.encode(), bytes.fromhex(salt), 600000).hex()
+            try:
+                conn.execute('INSERT INTO customers_online VALUES(?,?,?,?,?)', (account_id, 'demo', email, name, email))
+            except sqlite3.IntegrityError:
+                raise ValueError('This demo account already exists. Sign in to continue.') from None
+            conn.execute('INSERT INTO customer_passwords VALUES(?,?,?)', (account_id, salt, value))
+        else:
+            found = conn.execute('''SELECT a.id,p.salt,p.hash FROM customers_online a
+                JOIN customer_passwords p ON p.account_id=a.id WHERE a.provider='demo' AND a.subject=?''', (email,)).fetchone()
+            salt = found['salt'] if found else '00' * 16
+            value = pbkdf2_hmac('sha256', password.encode(), bytes.fromhex(salt), 600000).hex()
+            if not found or not compare_digest(found['hash'], value):
+                raise ValueError('That email address and password did not match.')
+            account_id = found['id']
+        return start_session(conn, account_id, raw, origin)
 
 
 def begin(provider, origin, client):
@@ -162,8 +212,6 @@ def finish(provider, origin, config, fields, raw):
     name = str(claims.get('name') or '')[:160]
     verified = claims.get('email_verified') in (True, 'true')
     email = str(claims.get('email') or '')[:254] if verified else ''
-    token = secrets.token_urlsafe(32)
-    previous = cookies(raw).get(SESSION_COOKIE, '')
     with closing(connect_accounts()) as conn, conn:
         conn.execute('''INSERT INTO customers_online VALUES(?,?,?,?,?)
             ON CONFLICT(provider,subject) DO UPDATE SET
@@ -172,9 +220,7 @@ def finish(provider, origin, config, fields, raw):
                      (secrets.token_hex(16), provider, subject, name, email))
         account = conn.execute('SELECT id FROM customers_online WHERE provider=? AND subject=?',
                                (provider, subject)).fetchone()
-        conn.execute('DELETE FROM customer_sessions WHERE expires<=? OR token=?', (now, digest(previous)))
-        conn.execute('INSERT INTO customer_sessions VALUES(?,?,?)', (digest(token), account['id'], now + SESSION_AGE))
-    return cookie(SESSION_COOKIE, token, origin, SESSION_AGE)
+        return start_session(conn, account['id'], raw, origin)
 
 
 def sign_out(raw, origin):

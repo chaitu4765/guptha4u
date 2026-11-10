@@ -2,7 +2,7 @@
 
 ## Local demo
 
-From the inner `guptha4u` repository, run `python server.py` and open `http://127.0.0.1:8090/shop`. The ERP remains at `/` and the original local ordering demo is at `/legacy-shop`.
+From the inner `guptha4u` repository, run `python server.py --demo` with a demo inventory and open `http://127.0.0.1:8090/shop`. The ERP remains at `/` and the original local ordering demo is at `/legacy-shop`. The switch uses separate SQLite files beside the catalogue for checkout and accounts, unless you supply their paths explicitly.
 
 This checkout came without a database. To preview the shipped 14-product catalogue in a fresh, dedicated SQLite file:
 
@@ -13,17 +13,19 @@ python enrich_demo.py
 python server.py
 ```
 
-The private client preview uses `data/storefront-demo.sqlite3` on ports 8096 (ERP) and 8097 (storefront). To apply the staged Himalaya snapshot to that database, run `python tools/import_himalaya.py data/himalaya-source` with `GUPTHA_DB` set as above. The importer checks sitemap coverage and backs up the database. Supplier availability is a snapshot for the demo cart. The imported rows do not add units to the ERP stock ledger.
+To populate a demo database from the staged Himalaya snapshot, run `python tools/import_himalaya.py data/himalaya-source --checked 2026-11-07 --seed-demo-stock` with `GUPTHA_DB` explicitly set to that existing demo file. The importer checks sitemap coverage and creates a backup. The stock switch records one simulated opening unit for each supplier-available variant without stock or movement history. Both the store and ERP use the inventory quantity thereafter.
 
 ### Checkout and Privilege demo
 
-Set `GUPTHA_DEMO_CHECKOUT_DB` to a separate writable SQLite file before starting the storefront. Set the same path on the private ERP process to see recent requests and orders under **Privilege cards**. The storefront calculates prices from the catalogue and records simulated orders in the demo database. Use sample contact details. Demo card numbers work in demo checkout with the contact used to enroll.
+Set `GUPTHA_DEMO_CHECKOUT_DB` to a separate writable SQLite file before starting the storefront. Set the same path on the private ERP process to see recent requests and orders under **Privilege cards**. Material checkout requires a customer account. A simulated UPI or card payment writes the receipt and decrements ERP inventory in the same transaction. Keep both SQLite databases on rollback journals (`DELETE`, `TRUNCATE` or `PERSIST`) for the shared transaction. Cash on delivery and pay-at-pickup orders record payment due. Use sample contact details. Demo card numbers work in demo checkout with the contact used to enroll.
 
 The demo charges ₹79 for delivery and offers free pickup. A ₹200 simulated purchase issues a card, as does one simulated paid merchandise order above ₹2,500 after discounts and before tax and delivery. A card offers 10% off the regular price when that beats the sale price. Keep the demo database separate from the catalogue and ERP files.
 
 The membership request and paid-order confirmation prepare WhatsApp drafts to the store’s Indian number. The shopper reviews and sends the draft in WhatsApp. Checkout never depends on WhatsApp delivery.
 
 ### Google and Apple sign-in
+
+The loopback demo also supports email signup and sign-in when both `GUPTHA_ACCOUNTS_DB` and `GUPTHA_DEMO_CHECKOUT_DB` are set. Use sample emails and unique demo passwords.
 
 Install the optional server dependency with `python -m pip install -r requirements-auth.txt`. Set `GUPTHA_ACCOUNTS_DB` to a separate writable SQLite file and `GUPTHA_PUBLIC_ORIGIN` to the storefront origin. Set these environment variables through the service manager or a secret store.
 
@@ -59,7 +61,7 @@ For a standalone shadcn version, run `npx shadcn@latest init -t vite` in a separ
 
 ## Production demo
 
-Run one instance of the public WSGI app on a host with persistent local disk. Run the ERP separately on loopback for private administration over SSH or a private network. Point both processes at the same persistent database and media folder. The public WSGI process opens SQLite read-only and serves storefront pages and assets, plus two read-only catalogue endpoints. The public proxy connects to Waitress on port 8080. Keep the ERP's port 8090 private.
+Run one instance of the public WSGI app on a host with persistent local disk. Run the ERP separately on loopback for private administration over SSH or a private network. Point both processes at the same persistent database and media folder. With demo checkout disabled, the public WSGI process opens the inventory database read-only. The public proxy connects to Waitress on port 8080. Keep the ERP's port 8090 private.
 
 1. Stop writes before moving the database. Use SQLite's backup API or copy the complete database while the ERP is stopped. Save the media directory alongside the backup. Verify the restored file with `PRAGMA integrity_check` and compare product counts and ordered product IDs with the original. Keep a protected off-host copy and regularly test restores. Keep SQLite on local block storage.
 2. On the host, set environment variables in the service manager. Set `GUPTHA_DB=/srv/gupta/data/retail.sqlite3`, `GUPTHA_MEDIA=/srv/gupta/media` and `GUPTHA_PUBLIC_ORIGIN=https://your-store.example`. Configure service users and permissions so the public process can read the database and approved images. Keep owner credentials and other deployment secrets outside source control.

@@ -5,6 +5,7 @@ from contextlib import closing
 from datetime import date, datetime
 from decimal import Decimal
 import json
+import os
 from pathlib import Path
 import re
 import sqlite3
@@ -133,8 +134,9 @@ def description(name, brand, group, leaf):
     return ' '.join(facts)
 
 
-def run(stage, checked):
-    if not DB.is_file() or DB.resolve() == (ROOT / 'data/retail.sqlite3').resolve():
+def run(stage, checked, seed_demo_stock=False):
+    if (not DB.is_file() or not os.environ.get('GUPTHA_DB')
+            or (DB.resolve() == (ROOT / 'data/retail.sqlite3').resolve() and not seed_demo_stock)):
         raise SystemExit('Set GUPTHA_DB to the existing dedicated demo database before importing.')
     products = {product['handle']: product for file in sorted(stage.glob('page-*.json'))
                 for product in read(file)['products']}
@@ -235,6 +237,15 @@ def run(stage, checked):
         saved = conn.execute('SELECT COUNT(*) FROM products WHERE source_id IS NOT NULL').fetchone()[0]
         if saved < counts['products']:
             raise ValueError('The import did not preserve every source variant.')
+        if seed_demo_stock:
+            # Preserve every opening balance and every item previously stocked or sold.
+            seed_ids = conn.execute('''SELECT id FROM products
+                WHERE source_id IS NOT NULL AND source_available=1 AND archived=0 AND stock=0
+                  AND id NOT IN (SELECT product_id FROM movements WHERE product_id IS NOT NULL)''').fetchall()
+            conn.executemany('UPDATE products SET stock=1 WHERE id=?', seed_ids)
+            conn.executemany('''INSERT INTO movements(created, product_id, delta, reason)
+                VALUES(strftime('%Y-%m-%dT%H:%M:%fZ','now'), ?, 1, 'Himalaya demo opening stock')''', seed_ids)
+            counts['demo_stock_seeded'] = len(seed_ids)
     print(dict(counts))
     print(f'{len(missing)} collection routes unavailable. Unlisted products use matching source tags where possible.')
     print(f'ERP backup: {backup}')
@@ -245,5 +256,6 @@ if __name__ == '__main__':
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument('snapshot', type=Path)
     cli.add_argument('--checked', default=date.today().isoformat(), type=lambda day: date.fromisoformat(day).isoformat())
+    cli.add_argument('--seed-demo-stock', action='store_true', help='Open one simulated unit for each available variant without stock history.')
     args = cli.parse_args()
-    run(args.snapshot, args.checked)
+    run(args.snapshot, args.checked, args.seed_demo_stock)

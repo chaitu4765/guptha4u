@@ -2,6 +2,7 @@
 
 const CART = 'gupta:cart';
 const WISHLIST = 'gupta:wishlist';
+const PENDING_ADD = 'gupta:pending-add';
 const PLACEHOLDER = '/storefront/placeholder.svg';
 const heart = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" aria-hidden="true"><path d="M20.8 8.6c0 4.7-8.8 9.4-8.8 9.4s-8.8-4.7-8.8-9.4a4.5 4.5 0 0 1 8.8-1 4.5 4.5 0 0 1 8.8 1Z"/></svg>';
 const escapes = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
@@ -131,8 +132,7 @@ function renderSaved() {
     subtotal += total;
     if (isCart && !valid) needsReview = true;
     const availability = !p ? 'No longer in the catalogue' : !available ? 'Out of stock' :
-      isCart && qty > p.stock ? (p.demo_quantity ? 'Demo limit: 1 per product. Update the quantity.' :
-        'Only ' + p.stock + ' in stock. Update the quantity.') : 'In stock';
+      isCart && qty > p.stock ? 'Only ' + p.stock + ' in stock. Update the quantity.' : 'In stock';
     const link = p ? '<a class="cart-item-name" href="' + p.url + '">' + name + '</a>' : '<strong>' + name + '</strong>';
     const action = isCart ? 'data-remove="' + id + '"' : 'data-save="' + id + '" data-name="' + name + '"';
     const quantity = isCart && available ? '<label class="cart-quantity">Quantity<span class="sr-only"> for ' + name +
@@ -222,7 +222,7 @@ document.addEventListener('submit', async event => {
   if (!form) return;
   event.preventDefault();
   const button = event.submitter || form.querySelector('button[type="submit"]');
-  if (button.disabled) return;
+  if (!button || button.disabled) return;
   const feedback = form.querySelector('[data-add-message]') || document.querySelector('#add-message');
   const id = form.dataset.add;
   const quantity = form.elements.quantity?.valueAsNumber ?? 1;
@@ -235,12 +235,19 @@ document.addEventListener('submit', async event => {
   feedback.classList.remove('cart-added');
   feedback.textContent = 'Checking stock…';
   try {
+    const session = await fetch('/shop/auth/session', { cache: 'no-store' });
+    if (!session.ok) throw new Error('Could not check your sign-in. Try again.');
+    if (!(await session.json()).signed_in) {
+      const next = location.pathname + location.search;
+      try { sessionStorage.setItem(PENDING_ADD, JSON.stringify({ next, id, quantity, time: Date.now() })); } catch {}
+      location.assign('/shop/sign-up?' + new URLSearchParams({ next }));
+      return;
+    }
     const product = (await resolveProducts([id])).get(id);
     const items = cart();
     const total = (items[id] || 0) + quantity;
     if (!product || !Number.isSafeInteger(quantity) || quantity < 1 || total > product.stock) {
-      feedback.textContent = product?.demo_quantity ? 'Demo limit: 1 per product.' :
-        product?.stock > 0 ? 'Only ' + product.stock + ' in stock, including items already in your cart.' :
+      feedback.textContent = product?.stock > 0 ? 'Only ' + product.stock + ' in stock, including items already in your cart.' :
           'This material is currently unavailable.';
       return;
     }
@@ -255,6 +262,22 @@ document.addEventListener('submit', async event => {
     button.removeAttribute('aria-busy');
   }
 });
+
+try {
+  const pending = JSON.parse(sessionStorage.getItem(PENDING_ADD));
+  if (pending && Date.now() - pending.time < 600000 && validId(pending.id)) {
+    const target = new URL(pending.next, location.origin);
+    if (target.origin === location.origin && target.pathname.startsWith('/shop')) {
+      if (location.pathname === '/shop/account') location.replace(target.href);
+      else if (target.href === location.href) {
+        sessionStorage.removeItem(PENDING_ADD);
+        const form = document.querySelector('[data-add="' + pending.id + '"]');
+        if (form?.elements.quantity) form.elements.quantity.value = pending.quantity;
+        form?.requestSubmit();
+      }
+    }
+  } else sessionStorage.removeItem(PENDING_ADD);
+} catch { /* Returning to the page still lets the customer retry the add. */ }
 
 const demoForm = document.querySelector('[data-demo-form]');
 if (demoForm) {

@@ -1,5 +1,6 @@
 """Test the catalogue and public boundary on a disposable copy of the shipped demo."""
 from contextlib import closing
+from concurrent.futures import ThreadPoolExecutor
 from http.cookiejar import CookieJar
 from io import BytesIO
 import json
@@ -10,7 +11,7 @@ import subprocess
 from tempfile import TemporaryDirectory
 from threading import Thread
 from urllib.error import HTTPError
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import parse_qs, urlencode, urlsplit
 from urllib.request import build_opener, HTTPCookieProcessor, Request
 from unittest.mock import patch
 import sys
@@ -65,7 +66,7 @@ def run(port, server, storefront, root, run_browser):
         except HTTPError as error:
             result = error
         with result:
-            assert result.status == code, (path, result.status, code)
+            assert result.status in (code if isinstance(code, tuple) else (code,)), (path, result.status, code)
             return result.read().decode()
 
     request('/api/setup', {'email':'storefront-test@example.test', 'password':'isolated-fixture-password'}, opener=owner)
@@ -163,8 +164,17 @@ def run(port, server, storefront, root, run_browser):
     print('PASS: demo catalogue, visibility, identity, filtering, image mapping, announcement permissions, SEO and WSGI isolation.', flush=True)
 
     os.environ['GUPTHA_DEMO_CHECKOUT_DB'] = str(root / 'checkout.sqlite3')
+    os.environ['GUPTHA_ACCOUNTS_DB'] = str(root / 'accounts.sqlite3')
+    shopper = build_opener(HTTPCookieProcessor(CookieJar()))
+    credentials = urlencode({'name':'Demo Customer','email':'demo-account@example.test',
+                             'password':'isolated-shopper-password'}).encode()
+    assert 'Create demo account' in request('/shop/checkout')
+    assert not json.loads(request('/shop/auth/session'))['signed_in']
+    with shopper.open(Request(base + '/shop/sign-up?next=%2Fshop%2Fcheckout', credentials,
+                             {'Origin':base, 'Content-Type':'application/x-www-form-urlencoded'})) as signed_up:
+        assert signed_up.url == base + '/shop/checkout' and b'Review order' in signed_up.read()
+    assert json.loads(request('/shop/auth/session', opener=shopper))['signed_in']
     assert 'Request a Privilege card' in request('/shop/privilege')
-    assert 'Review order' in request('/shop/checkout')
     request('/api/storefront-demo', code=401)
     privilege = '/api/storefront/demo/privilege'
     checkout = '/api/storefront/demo/checkout'
@@ -184,33 +194,50 @@ def run(port, server, storefront, root, run_browser):
         original_orders = c.execute('SELECT count(*) FROM orders').fetchone()[0]
     info = {'action':'review', 'items':{str(id_for):1}, 'name':'Demo Customer',
             'contact':contact, 'fulfillment':'pickup', 'payment':'upi', 'card':bought['card']}
-    request(checkout, {**info, 'contact':'wrong@example.test'}, code=400)
-    request(checkout, {**info, 'items':{str(id_for):99}}, code=400)
-    review = json.loads(request(checkout, info))
+    request(checkout, info, code=401)
+
+    def pay(data, code=200):
+        return json.loads(request(checkout, data, code=code, opener=shopper))
+
+    pay({**info, 'contact':'wrong@example.test'}, code=400)
+    pay({**info, 'items':{str(id_for):99}}, code=400)
+    review = pay(info)
     assert review['quote']['subtotal'] == 12345 and review['quote']['savings'] == 0
     request('/api/products', {**first, 'id':id_for, 'price':2500, 'mrp':2500,
                               'featured_discount':False}, opener=owner)
     order = {**info, 'action':'order', 'review':review['review'], 'request_key':str(uuid.uuid4())}
-    request(checkout, order, code=400)
-    review = json.loads(request(checkout, info))
+    pay(order, code=400)
+    review = pay(info)
     assert review['quote']['savings'] == 25000 and review['quote']['total'] == 225000
     exact = {**info, 'contact':'earn@example.test', 'card':''}
-    assert not json.loads(request(checkout, exact))['quote']['earns_card']
+    assert not pay(exact)['quote']['earns_card']
     earn = {**exact, 'items':{str(id_for):2}}
-    assert not json.loads(request(checkout, {**earn, 'payment':'pickup'}))['quote']['earns_card']
-    review = json.loads(request(checkout, earn))
+    assert not pay({**earn, 'payment':'pickup'})['quote']['earns_card']
+    review = pay(earn)
     assert review['quote']['earns_card']
     order = {**earn, 'action':'order', 'review':review['review'], 'request_key':str(uuid.uuid4())}
-    receipt = json.loads(request(checkout, order))
+    receipt = pay(order)
     assert receipt['card'] and receipt['total'] == 500000 and receipt['paid']
     message = parse_qs(urlsplit(receipt['whatsapp']).query)['text'][0]
     assert all(part in message for part in (receipt['reference'], 'Demo Customer', 'QA Studio Palette', 'Palettes', 'Quantity: 2'))
-    assert json.loads(request(checkout, order)) == receipt
+    assert pay(order) == receipt
+    assert json.loads(request('/api/storefront/products?ids=' + str(id_for)))['products'][0]['stock'] == original_stock - 2
     activity = json.loads(request('/api/storefront-demo', opener=owner))['activity']
     assert len(activity['orders']) == 2 and activity['applications'][0]['contact'] == contact
     with closing(server.connect()) as c:
-        assert c.execute('SELECT stock FROM products WHERE id=?', (id_for,)).fetchone()['stock'] == original_stock
+        assert c.execute('SELECT stock FROM products WHERE id=?', (id_for,)).fetchone()['stock'] == original_stock - 2
+        assert [r['delta'] for r in c.execute('SELECT delta FROM movements WHERE reason=?',
+                ('Demo storefront payment ' + receipt['reference'],))] == [-2]
         assert c.execute('SELECT count(*) FROM orders').fetchone()[0] == original_orders
+    remaining = {**exact, 'contact':'competing@example.test', 'items':{str(id_for):original_stock - 2}}
+    final_review = pay(remaining)['review']
+    simultaneous = [{**remaining, 'action':'order', 'review':final_review, 'request_key':str(uuid.uuid4())}
+                    for _ in range(2)]
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        outcomes = list(pool.map(lambda data: pay(data, code=(200, 400)), simultaneous))
+    assert sum('reference' in outcome for outcome in outcomes) == 1
+    assert json.loads(request('/api/storefront/products?ids=' + str(id_for)))['products'][0]['stock'] == 0
+    request('/api/stock', {'product_id':id_for, 'quantity':original_stock, 'reason':'Reset competing payment fixture'}, opener=owner)
     request('/api/products', {**first, 'id':id_for}, opener=owner)
 
     raw = json.dumps({'action':'apply', 'contact':'wsgi@example.test'}).encode()
@@ -222,7 +249,7 @@ def run(port, server, storefront, root, run_browser):
         }, lambda status, headers: result.append(status)))
         assert result[0].startswith(expected), (result, body)
     wsgi('/api/storefront-demo', 404)
-    print('PASS: Privilege requests, purchase, order threshold, savings, repricing, retries, origin and ERP isolation.', flush=True)
+    print('PASS: signup gate, paid stock movement, idempotent receipts, Privilege, repricing and origin checks.', flush=True)
 
     assert 'Continue with Google' in request('/shop/sign-in')
     assert 'Create your account' in request('/shop/sign-up')

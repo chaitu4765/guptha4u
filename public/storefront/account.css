@@ -1,23 +1,41 @@
-/* Hallmark v2.0.0 | inherited Gupta storefront | editorial app screen | account | signature: the brush shelf */
-/* Critique: lead with access to the account and let one real storefront image carry the second column. */
-/* Hallmark · waive 80 · mrf footer · The account shares the Meadow Rise illustration requested for Gupta's footer. */
-.account-shell { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .85fr); align-items: center; gap: clamp(24px, 6vw, 96px); max-width: 1100px; min-height: min(640px, calc(100svh - 88px)); padding-block: clamp(36px, 5vw, 76px); }
-.account-copy { min-width: 0; }
+.account-shell { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .94fr); max-width: 1136px; margin-block: clamp(24px, 4.4vw, 68px); }
+.account-copy { min-width: 0; padding: clamp(24px, 4vw, 56px); border: 1px solid var(--color-line); border-inline-end: 0; border-radius: 16px 0 0 16px; background: var(--color-surface); }
 .account-copy h1, .account-dashboard h1, .account-dashboard h2 { text-wrap: balance; }
-.account-copy > p:first-of-type { max-width: 48ch; margin-top: 12px; color: var(--color-secondary-on-muted); }
-.account-art { display: block; overflow: clip; background: var(--color-muted); border-radius: var(--radius); }
-.account-art img { width: 100%; max-height: 430px; object-fit: cover; object-position: center 62%; }
-.account-providers { display: grid; gap: 12px; max-width: 360px; margin-block: 24px 16px; }
-.account-provider { min-height: 48px; width: 100%; justify-content: center; }
-.account-provider:disabled { opacity: .6; cursor: not-allowed; }
-.account-note { margin-top: 8px; color: var(--color-secondary-on-muted); }
-.account-browse { display: inline-flex; align-items: center; min-height: 44px; margin-top: 12px; }
+.account-copy h1 { font-size: 2.8rem; line-height: 1.04; }
+.account-intro { max-width: 37ch; margin-top: 8px; color: var(--color-secondary-on-muted); }
+.account-art { position: relative; margin: 0; overflow: clip; background: var(--color-muted); border-radius: 0 16px 16px 0; }
+.account-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 23% center; }
+.account-art figcaption { position: absolute; inset: auto 0 0; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 16px; padding: 50px 24px 20px; background: linear-gradient(transparent, #24180de8); color: #fff7e9; font-family: var(--font-display); font-size: 1.5rem; }
+.account-art figcaption span { font: 700 .8rem/1.4 var(--font-body); }
+.account-browse { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-bottom: 12px; font-size: .85rem; text-decoration: none; }
+.account-browse svg { width: 16px; height: 16px; transform: rotate(180deg); }
+.account-form { display: grid; gap: 12px; margin-top: 24px; }
+.account-form label { display: grid; gap: 5px; font-size: .86rem; font-weight: 750; }
+.account-form input { width: 100%; min-height: 46px; padding: 9px 12px; background: var(--color-canvas); border: 1px solid var(--color-control-line); border-radius: 8px; }
+.account-form .button { width: 100%; margin-top: 3px; }
+.account-divider { display: flex; align-items: center; gap: 12px; margin-block: 20px 12px; color: var(--color-secondary-on-muted); font-size: .8rem; }
+.account-divider::before, .account-divider::after { content: ''; flex: 1; border-top: 1px solid var(--color-line); }
+.account-providers { display: grid; gap: 8px; }
+.account-intro + .account-providers { margin-top: 22px; }
+.account-provider { display: grid; grid-template-columns: 36px 1fr 36px; align-items: center; min-height: 46px; padding: 0 8px; border: 1px solid var(--color-control-line); border-radius: 8px; background: #fff; color: #1c1b19; font: 750 .88rem/1.3 var(--font-body); text-align: center; text-decoration: none; }
+.account-provider img { width: 20px; height: 20px; object-fit: contain; justify-self: center; }
+.account-provider-apple img { width: 36px; height: 36px; }
+.account-provider:disabled { background: #fff; color: var(--color-secondary-on-muted); cursor: not-allowed; }
+.account-provider:is(a, button:enabled):hover { border-color: var(--color-accent-hover); }
+.account-note { margin-top: 8px; color: var(--color-secondary-on-muted); font-size: .8rem; }
+.account-form .account-note { margin: 0; }
+.account-switch { margin-top: 18px; font-size: .89rem; }
+.account-switch a { font-weight: 800; text-underline-offset: 3px; }
+.account-error { margin-top: 14px; color: #852a21; font-weight: 750; }
 .account-dashboard > p, .account-dashboard > h2 { margin-top: 20px; }
 .account-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-block: 24px 36px; }
 .account-orders { list-style: none; padding: 0; max-width: 720px; }
 .account-orders li { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px 24px; border-bottom: 1px solid var(--color-line); padding-block: 16px; }
 .account-orders span { color: var(--color-secondary-on-muted); }
-@media (max-width: 700px) {
-  .account-shell { grid-template-columns: minmax(0, 1fr); min-height: auto; }
-  .account-art img { aspect-ratio: 1.5; object-position: center 63%; }
+@media (max-width: 740px) {
+  .account-shell { grid-template-columns: minmax(0, 1fr); }
+  .account-copy { border-inline-end: 1px solid var(--color-line); border-radius: 16px 16px 0 0; }
+  .account-copy h1 { font-size: 2.35rem; }
+  .account-art { min-height: 210px; border-radius: 0 0 16px 16px; }
+  .account-art img { object-position: 28% 59%; }
 }

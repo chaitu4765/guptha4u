@@ -11,6 +11,7 @@ MEASUREMENT = re.compile(r'(\d+)(ml|mm|cm|gsm|kg|mg)')
 def init_search(connection):
     connection.execute('CREATE INDEX IF NOT EXISTS product_sku_search ON products(sku COLLATE NOCASE)')
     connection.execute('CREATE INDEX IF NOT EXISTS product_source_sku_search ON products(source_sku COLLATE NOCASE)')
+    connection.execute('CREATE INDEX IF NOT EXISTS product_name_search ON products(name COLLATE NOCASE) WHERE archived=0')
     if connection.execute("SELECT 1 FROM sqlite_master WHERE name='storefront_search_update'").fetchone():
         return
     columns = ', '.join(FIELDS)
@@ -52,12 +53,13 @@ def search_ids(connection, query, limit=-1):
     terms = re.findall(r'[^\W_]+', normalized)
     if not terms:
         return []
-    terms = re.sub(r'\b(\d+)\s+(ml|mm|cm|gsm|kg|mg)\b', r'\1\2', ' '.join(terms)).split()
+    joined = re.sub(r'\bwater colou?r\b', 'watercolour', ' '.join(terms))
+    terms = re.sub(r'\b(\d+)\s+(ml|mm|cm|gsm|kg|mg)\b', r'\1\2', joined).split()
 
     def term_options(term, prefix):
-        suffix = '*' if prefix else ''
-        options = [f'"{term}"{suffix}']
         measurement = MEASUREMENT.fullmatch(term)
+        suffix = '*' if prefix and not (term.isdigit() or measurement) else ''
+        options = [f'"{term}"{suffix}']
         if measurement:
             amount, unit = measurement.groups()
             options.append(f'"{amount} {unit}"{suffix}')
@@ -95,12 +97,17 @@ def search_ids(connection, query, limit=-1):
 
     corrected = []
     changed = False
+    vocabulary_word = 'SELECT 1 FROM storefront_search_terms WHERE term=?'
     for term, options in zip(terms, alternatives):
-        if len(term) >= 4 and term.isalpha():
-            candidates = [row[0] for row in connection.execute(
-                'SELECT term FROM storefront_search_terms WHERE term GLOB ? AND length(term) BETWEEN ? AND ?',
-                (term[0] + '*', len(term) - 1, len(term) + 1))]
-            matches = [word for word in get_close_matches(term, candidates, n=3, cutoff=.80) if word != term]
+        if len(term) >= 4 and term.isalpha() and not connection.execute(vocabulary_word, (term,)).fetchone():
+            # Try one extra character with exact FTS vocabulary seeks before scanning near spellings.
+            deletions = dict.fromkeys(term[:i] + term[i+1:] for i in range(len(term)))
+            candidates = [word for word in deletions if connection.execute(vocabulary_word, (word,)).fetchone()]
+            if not candidates:
+                candidates = [row[0] for row in connection.execute(
+                    'SELECT term FROM storefront_search_terms WHERE term GLOB ? AND length(term) BETWEEN ? AND ?',
+                    (term[0] + '*', len(term) - 1, len(term) + 1))]
+            matches = get_close_matches(term, candidates, n=3, cutoff=.80)
             options.extend(f'"{word}"' for word in matches)
             changed |= bool(matches)
         corrected.append('(' + ' OR '.join(options) + ')')

@@ -78,6 +78,12 @@ async page => {
   await page.locator('[data-add] input').fill('2');
   await page.locator('[data-add]').filter({has:page.locator('input[name="quantity"]')})
     .getByRole('button', {name:'Add to cart'}).click();
+  await page.waitForURL('**/shop/sign-up?next=*');
+  await page.getByLabel('Full name').fill('Browser Demo Shopper');
+  await page.getByLabel('Email address').fill('browser-demo@example.test');
+  await page.getByLabel('Password', {exact:true}).fill('isolated-browser-shopper-password');
+  await page.getByRole('button', {name:'Create demo account'}).click();
+  await page.waitForURL('**' + path);
   await page.locator('#add-message').getByText('Added to your cart.', {exact:true}).waitFor();
   await go('/shop/cart');
   await image(page.locator('.cart-line img'), 'paints.webp');
