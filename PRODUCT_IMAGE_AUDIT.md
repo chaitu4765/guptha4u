@@ -1,0 +1,34 @@
+# Product image and reference-price audit
+
+The user confirmed permission to use Himalaya’s photos in the private client demo. All 14 original demo SKUs now use their matching Himalaya listing photos. The expanded import checks every listing’s image association and withholds photos missing from the feed or shared across conflicting product records. See `data/himalaya-source/photo-review.json` for the pending items. Each displayed source photo records the linked listing and the private demo permission on its ERP record.
+
+The follow-up reviewed the 297 pending SKUs against 146 distinct photos attached to their Himalaya listings. The remaining 59 listings have no attached image. The review found size charts shared across Rosemary brush variants, a repeated incorrect brush shape across Daler-Rowney Graduate listings, a Canson A4 cover attached to an A5+ pad, a Sakura Graphic 3 attached to a Micron 12, Winsor & Newton Iridescent Medium attached to Drying Poppy Oil, and a Lefranc Bourgeois oil set attached to an acrylic set. These photos were withheld.
+
+Manufacturer references establish the [Rosemary Ultimate Short Flat sizes](https://www.rosemaryandco.com/oil-brushes/ultimate/ultimate-short-flat), [Silver Brush 5225S model and size options](https://www.silverbrush.com/products/silver-atelier-golden-taklon-quill-short-handle), [Fabriano Elle Erre formats](https://fabriano.com/prodotto/elle-erre/) and [Lefranc Bourgeois acrylic set](https://eu.lefrancbourgeois.com/products/fine-acrylic-set-the-fundamentals-12x20ml). Matching packshots with reuse clearance are still needed. [Daler-Rowney’s stockist program](https://daler-rowney.com/become-a-stockist/) and [Royal Talens’ Mediabank](https://www.royaltalens.com/pages/b2b-customer-portal) provide retailer imagery to eligible business accounts.
+
+The 7 November 2026 identity review below records manufacturer references and paths to replacement assets for the original 14. The [original price snapshot](reference/demo-products.json) preserves the source IDs and historical reference links.
+
+| ERP SKU | Product identity and reference | Barcode or supplier code | What to request |
+|---|---|---|---|
+| DEMO-ART-001 | [Camel Artist Acrylic Crimson Lake 063, 40 ml](https://www.kokuyocamlin.com/camel/paints/artist-acrylic-colours/individual/individual-tube-of-crimson-lake-in-40-ml) | 8901425010686 | Camlin packshot and written reuse permission |
+| DEMO-ART-002 | [Camel Artist Acrylic Titanium White 423, 40 ml](https://www.kokuyocamlin.com/camel/paints/artist-acrylic-colours/individual/individual-tube-of-titanium-white-in-40-ml) | 8901425010600 | Camlin packshot and written reuse permission |
+| DEMO-ART-003 | [Camel Artist Acrylic Black 016, 40 ml](https://www.kokuyocamlin.com/camel/paints/artist-acrylic-colours/individual/individual-tube-of-black-in-40-ml) | 8901425010112 | Camlin packshot and written reuse permission |
+| DEMO-ART-004 | [Daler-Rowney Aquafine two half pans, Cobalt Blue Hue / Phthalo Blue 012](https://www.fila.it/up/sites/12/DalerRowneyPreisliste-2.pdf) | 5011386118000 | Daler-Rowney partner packshot of the two-pan blister |
+| DEMO-ART-005 | [Schmincke Horadam Lemon Yellow 14215, one half pan](https://www.schmincke.de/produkte/aquarell/horadam-aquarell) | 4012380009630 | Authorized photo of the single half pan. The [openly licensed palette photo](https://commons.wikimedia.org/wiki/File:Couleurs_de_Schmincke.jpg) does not identify this variant. |
+| DEMO-ART-006 | [Daler-Rowney Aquafine two half pans, Viridian Hue / Leaf Green 014](https://www.fila.it/up/sites/12/DalerRowneyPreisliste-2.pdf) | 5011386118024 | Daler-Rowney partner packshot of the two-pan blister |
+| DEMO-ART-007 | [Cyprus Mop Dagger Series 2006 No. 2](https://www.himalayafineart.com/products/cyprus-mop-dagger-sr-2006-no-2) | A00014320 | Authorized supplier photo showing series and size |
+| DEMO-ART-008 | [Cyprus Tejin Fan Series 3004 No. 4](https://www.himalayafineart.com/products/cyprus-tejin-hair-brush-fan-sr-3004-no-4) | A00014358 | Authorized supplier photo showing series and size |
+| DEMO-ART-009 | [Himalaya Professional Stretched Canvas, 6 × 6 in](https://www.himalayafineart.com/products/himalaya-professional-stretched-canvas-6-x-6) | A00003996 | Himalaya photo confirmed to show the 6 × 6 in variant, with permission |
+| DEMO-ART-010 | [Camel Canvas Board, 8 × 8 in](https://www.kokuyocamlin.com/camel/canvases/canvas-boards/individual/individual-small-canvas-with-size-20-cm-x-20-cm) | 8901425054567 | Camlin packshot and written reuse permission |
+| DEMO-ART-011 | [Renaissance R-111 Travel Pad 105358, 20 sheets, 200 gsm, 7.5 × 11 in](https://renaissance.co.th/wp-content/uploads/2025/05/RNS-CATALOG-2025_Smal.pdf) | 8851907105358 | Authorized photo of the 20-sheet R-111. The manufacturer catalogue confirms 7.5 × 11 in for this barcode. |
+| DEMO-ART-012 | [Fabriano Accademia 41202129, A4 glued pad, 30 sheets, 200 gsm](https://fabriano.com/wp-content/uploads/2021/10/Accademia_EN.pdf) | 8001348150770 | Authorized photo for the exact A4 glued pad |
+| DEMO-ART-013 | [Sakura Pigma Micron 01 Black #49, 0.25 mm, XSDK0149](https://www.royaltalens.com/products/sakura-pigma-micron-01-0-25-mm?variant=53651363529089) | 0084511306363 | Royal Talens Mediabank packshot for XSDK0149 |
+| DEMO-ART-014 | [Daler-Rowney Simply Box Easel 835200020](https://daler-rowney.com/product/simply-box-easel/) | 5011386062853 | Daler-Rowney partner packshot for 835200020 |
+
+[Camlin](https://www.kokuyocamlin.com/camel/disclaimer) restricts republishing website content. [Himalaya](https://www.himalayafineart.com/pages/terms-conditions) requires prior permission. [Daler-Rowney](https://daler-rowney.com/faqs/) and [Royal Talens](https://www.royaltalens.com/pages/b2b-customer-portal) provide product assets through their business partner programs. Use a supplier pack that covers storefront use or an original photo owned by Gupta.
+
+To request assets, send the relevant identifiers above and ask for a photo of each exact variant plus written permission to display it on Gupta Art Store’s catalogue, search, product pages, wishlist and cart. Record any required credit with the file. No requests were sent as part of this audit.
+
+Publish a reviewed photo by adding its local path, source and permission to the matching ERP Inventory row and selecting image verification. The same ERP product ID supplies the name and image in search, wishlist, cart, product pages and catalogue. The original studio artwork is only used for category navigation.
+
+The pricing snapshot retains the retailer reference URLs and comparison prices. Three products meet the 20% threshold, with DEMO-ART-007 initially featured. The R-111 size and Sakura tip labels use the manufacturer specifications above; both corrections preserve IDs, stock and prices.

@@ -4,11 +4,13 @@ const paths={grid:'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',cart:'
 const icon=n=>`<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="${paths[n]||paths.box}"/></svg>`;
 const brand=()=>`<div class="brand"><span class="mark">g.</span><div>Guptha Arts<small>RETAIL WORKSPACE</small></div></div>`;
 let appliedCard=null;
-let state={},cart=[],held=null,shopMode=location.pathname==='/shop',route='dashboard',filter='',category='',shopData={},shopCart=[];
+let state={},cart=[],held=null,shopMode=location.pathname==='/legacy-shop',route='dashboard',filter='',category='',shopData={},shopCart=[];
 let currentPdpId=null,lastPlacedOrder=null,shopSearchFilter='',shopCategoryFilter='';
+let inventoryPage=0;
 
 function productImgSrc(p){
-  if(p && p.image && String(p.image).trim()) return String(p.image).trim();
+  if(p?.source_id && (!p.image_verified || !p.image)) return '/storefront/placeholder.svg';
+  if(p && p.image && String(p.image).trim()) return esc(String(p.image).trim());
   const n = ((p?.name || '') + ' ' + (p?.category || '')).toLowerCase();
   if (n.includes('acrylic') && n.includes('white')) return '/images/acrylic-white.jpg';
   if (n.includes('acrylic') && (n.includes('black') || n.includes('lamp'))) return '/images/acrylic-black.jpg';
@@ -438,21 +440,41 @@ dashboard(){
 },
 products(){return heading('Inventory','Every material, every colour, every piece accounted for.',btn('Export CSV','export-products')+btn(icon('plus')+' Add product','product-new',true))+`<section class="panel"><div class="toolbar"><input id="search" placeholder="Search product name or SKU…" value="${esc(filter)}" aria-label="Search inventory">${categorySelect()}</div><div id="product-table">${productTable()}</div></section>`},
 customers(){return heading('Customers','Know the people who make your store.',btn(icon('plus')+' Add customer','customers-new',true))+`<section class="panel">${table(['Name','Phone','Email','Completed purchases','Total spent',''],state.customers.map(c=>{const orders=customerOrders(c).filter(o=>o.status==='Completed');return `<tr><td><b>${esc(c.name)}</b></td><td>${esc(c.phone)||'—'}</td><td>${esc(c.email)||'—'}</td><td>${orders.length}</td><td>${money(orders.reduce((sum,o)=>sum+o.total,0))}</td><td><div class="actions"><button data-action="customer-history" data-id="${c.id}">Purchases</button><button data-action="customers-edit" data-id="${c.id}">Edit</button></div></td></tr>`}))}</section>`},
-privilege(){return heading('Privilege cards','Set a member’s discount and apply it by card number at billing.',btn(icon('plus')+' Add privilege card','card-new',true))+`<section class="panel">${table(['Card number','Customer','Discount','Valid until','Status',''],state.privilege_cards.map(c=>`<tr><td><b>${esc(c.number)}</b></td><td>${esc(state.customers.find(p=>p.id===c.customer_id)?.name||'Unassigned')}</td><td>${c.percent}%</td><td>${c.expires?esc(c.expires):'No expiry'}</td><td>${status(!c.active?'Inactive':c.expires&&c.expires<new Date().toLocaleDateString('en-CA')?'Expired':'Active')}</td><td><button data-action="card-edit" data-id="${c.id}">Edit</button></td></tr>`))}</section>`},
+privilege(){return heading('Privilege cards','Set a member’s discount and apply it by card number at billing.',btn(icon('plus')+' Add privilege card','card-new',true))+`<section class="panel">${table(['Card number','Customer','Discount','Valid until','Status',''],state.privilege_cards.map(c=>`<tr><td><b>${esc(c.number)}</b></td><td>${esc(state.customers.find(p=>p.id===c.customer_id)?.name||'Unassigned')}</td><td>${c.percent}%</td><td>${c.expires?esc(c.expires):'No expiry'}</td><td>${status(!c.active?'Inactive':c.expires&&c.expires<new Date().toLocaleDateString('en-CA')?'Expired':'Active')}</td><td><button data-action="card-edit" data-id="${c.id}">Edit</button></td></tr>`))}</section><section class="panel" id="demo-privilege-activity" hidden></section>`},
 suppliers(){return contacts('suppliers','Suppliers','Your trusted partners, in one place.')},
 orders(){return heading('Orders','Counter sales and online orders, together.',btn('Export CSV','export-orders'))+`<section class="panel"><div class="toolbar"><input id="order-search" placeholder="Search name or order number…" aria-label="Search orders"><select id="status-filter" aria-label="Order status"><option value="">All statuses</option>${['New','Processing','Ready','Completed','Cancelled','Returned'].map(s=>`<option>${s}</option>`).join('')}</select></div><div id="orders-table">${ordersTable(state.orders)}</div></section>`},
 purchases(){return heading('Purchasing','Receive supplies and update stock in one step.',btn(icon('plus')+' Receive purchase','purchase-new',true))+`<section class="panel">${table(['Received','Supplier','Product','Quantity','Unit cost','Total','Reference'],state.purchases.map(p=>`<tr><td>${date(p.created)}</td><td>${esc(state.suppliers.find(s=>s.id===p.supplier_id)?.name||'Supplier')}</td><td>${esc(state.products.find(s=>s.id===p.product_id)?.name||'Archived product')}</td><td>${p.qty}</td><td>${money(p.cost)}</td><td>${money(p.total)}</td><td>${esc(p.reference)}</td></tr>`))}</section>`},
 pos(){return heading('Billing / POS','Make room for the next creative idea.',btn(`Held bills (${state.holds.length})`,'holds'))+`<div class="pos"><section><div class="toolbar"><input id="pos-search" placeholder="Search name, SKU or scan barcode…" aria-label="Search or scan product"><select id="pos-category" aria-label="Category"><option value="">All categories</option>${categories().map(c=>`<option>${esc(c)}</option>`).join('')}</select></div><div id="pos-products" class="productgrid">${productCards(state.products)}</div></section><section class="panel cartpanel"><div class="panelhead"><h2>Current bill</h2><button data-action="clear-cart">Clear</button></div><label for="bill-phone">Customer mobile</label><input id="bill-phone" type="tel" inputmode="numeric" autocomplete="off" placeholder="10-digit mobile number"><label for="bill-name">Customer name</label><input id="bill-name" placeholder="Name for a new customer"><p id="customer-lookup" class="hint" role="status">Enter a mobile number to find a previous customer.</p><label for="bill-customer">Or select a customer</label><select id="bill-customer"><option value="">Walk-in customer</option>${state.customers.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select><div id="cart-lines"></div>${privilegeEntry()}<div class="carttotal"><div><span>Subtotal</span><b id="subtotal"></b></div><div><label for="discount">Discount (₹)</label><input id="discount" type="number" min="0" step="0.01" value="0"></div><div><span>Tax</span><b id="tax"></b></div><div class="grand"><span>Total</span><span id="total"></span></div></div><label for="payment">Record payment as</label><select id="payment"><option>Cash</option><option>UPI</option><option>Card</option><option value="Split">Split payment</option><option>Credit</option></select>${splitPaymentEntry()}<p class="hint">UPI and card options record payments received outside this app.</p><button class="primary full" style="margin-top:18px" data-action="checkout">Complete sale ${icon('arrow')}</button><button class="full" style="margin-top:8px" data-action="hold">Hold bill</button></section></div>`},
 reports(){const os=activeOrders(),sales=os.reduce((n,o)=>n+o.subtotal-o.discount,0),tax=os.reduce((n,o)=>n+o.tax,0),paid=os.reduce((n,o)=>n+o.paid,0);return heading('Reports','A clear view of your business. All time.',btn('Export orders','export-orders'))+`<div class="grid2"><section class="panel"><h2>Sales summary</h2>${[['Taxable sales after discounts',sales],['Tax recorded',tax],['Total sales',sales+tax],['Payments received',paid],['Outstanding balance',sales+tax-paid]].map(([k,v])=>`<div class="reporttotal"><span>${k}</span><strong>${money(v)}</strong></div>`).join('')}<p class="hint">Cancelled and returned orders are excluded. Recorded tax is an operational summary, not a filed GST return.</p></section><section class="panel"><h2>Payments by method</h2>${['Cash','UPI','Card','Legacy'].map(method=>{const amount=state.payments.filter(p=>p.method===method&&os.some(o=>o.id===p.order_id)).reduce((n,p)=>n+p.amount,0);return amount||method!=='Legacy'?`<div class="reporttotal"><span>${method}</span><strong>${money(amount)}</strong></div>`:''}).join('')}<p class="hint">Payments on active orders. Returned and cancelled orders are excluded; refunds are handled separately.</p><h2 style="margin-top:28px">Inventory value</h2><div class="reporttotal"><span>At purchase cost</span><strong>${money(state.products.reduce((n,p)=>n+p.cost*p.stock,0))}</strong></div><div class="reporttotal"><span>At selling price</span><strong>${money(state.products.reduce((n,p)=>n+p.price*p.stock,0))}</strong></div><div class="reporttotal"><span>Units on hand</span><strong>${state.products.reduce((n,p)=>n+p.stock,0)}</strong></div><div class="reporttotal"><span>Purchases received</span><strong>${money(state.purchases.reduce((n,p)=>n+p.total,0))}</strong></div></section></div><section class="panel"><h2>Stock movement history</h2>${table(['When','Product','Change','Reason'],state.movements.slice(0,200).map(m=>`<tr><td>${date(m.created)}</td><td>${esc(state.products.find(p=>p.id===m.product_id)?.name||'Archived product')}</td><td>${m.delta>0?'+':''}${m.delta}</td><td>${esc(m.reason)}</td></tr>`))}</section>`},
-settings(){const s=state.settings;return heading('Store settings','The details your customers see on their invoices.')+`<section class="panel" style="max-width:800px"><form id="settings-form"><div class="formgrid">${field('Business name','name',s.name,'text','required')}${field('Phone','phone',s.phone)}<label class="wide">Address<textarea name="address">${esc(s.address)}</textarea></label>${field('GSTIN (if registered)','gstin',s.gstin)}${field('Invoice footer','footer',s.footer)}</div><p class="hint">Product prices are entered before tax. Set each product’s applicable tax rate with your accountant. For an unregistered business, leave GSTIN blank and tax at zero.</p><button class="primary" style="margin-top:24px">Save store details</button></form></section><section class="panel" style="max-width:800px;margin-top:22px"><h2>Your business data</h2><p class="muted">Download all operational records as JSON. Your SQLite database is stored locally in the project’s data folder.</p><a class="button" href="/api/backup" download>${icon('download')} Download data backup</a></section>`}
+settings(){const s=state.settings;return heading('Store settings','The details your customers see on their invoices.')+`<section class="panel" style="max-width:800px"><form id="settings-form"><div class="formgrid">${field('Business name','name',s.name,'text','required')}${field('Phone','phone',s.phone)}<label class="wide">Address<textarea name="address">${esc(s.address)}</textarea></label>${field('GSTIN (if registered)','gstin',s.gstin)}${field('Invoice footer','footer',s.footer)}</div><p class="hint">Product prices are entered before tax. Set each product’s applicable tax rate with your accountant. For an unregistered business, leave GSTIN blank and tax at zero.</p><button class="primary" style="margin-top:24px">Save store details</button></form></section><section class="panel" style="max-width:800px;margin-top:22px"><h2>Your business data</h2><p class="muted">Download all operational records as JSON. Your SQLite database is stored locally in the project’s data folder.</p><a class="button" href="/api/backup" download>${icon('download')} Download data backup</a></section>
+<section class="panel" style="max-width:800px;margin-top:22px"><h2>Storefront announcement</h2>
+<form id="announcement-form"><div class="formgrid">
+<label class="wide">Message<input name="message" maxlength="180" value="${esc(s.announcement)}"></label>
+${field('Link (optional)','link',s.announcement_link,'text','maxlength="500" placeholder="/shop/catalogue"')}
+${field('Start date','start',s.announcement_start,'date')}
+${field('End date','end',s.announcement_end,'date')}
+<label class="check wide"><input name="active" type="checkbox" ${s.announcement_active ? 'checked' : ''}>Show announcement</label>
+</div><p class="hint">The public demo includes unpublished products. Archived products are hidden.</p>
+<div class="formerror" role="alert"></div><button class="primary">Save announcement</button></form>
+<p><a href="/legacy-shop">Open the local order-taking demo</a></p></section>`}
 };
 
 function categories(){return [...new Set((shopMode?shopData.products:state.products||[]).map(p=>p.category).filter(Boolean))]}
 function categorySelect(){return `<select id="category" aria-label="Product category"><option value="">All categories</option>${categories().map(c=>`<option ${category===c?'selected':''}>${esc(c)}</option>`).join('')}</select>`}
 
 function productTable(){
-  let ps=state.products.filter(p=>(p.name+' '+p.sku).toLowerCase().includes(filter.toLowerCase())&&(!category||p.category===category));
-  return table(['Product','SKU','Category','Price','In stock','Storefront',''],ps.map(p=>`<tr><td><div style="display:flex;align-items:center;gap:10px"><img src="${productImgSrc(p)}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid #e2e8f0"><div><b>${esc(p.name)}</b><small style="display:block">${esc((p.description||'').slice(0,50))}</small></div></div></td><td>${esc(p.sku)}</td><td><span class="categorypill">${esc(p.category||'Uncategorised')}</span></td><td>${money(p.price)}<small>+ ${p.tax}% tax</small></td><td>${status(p.stock<=p.reorder?'Low stock':'In stock')} <b>${p.stock}</b></td><td>${p.published?'Published':'Hidden'}</td><td><div class="actions"><button data-action="product-edit" data-id="${p.id}">Edit</button><button data-action="stock" data-id="${p.id}">Stock</button><button data-action="archive" data-id="${p.id}" aria-label="Archive ${esc(p.name)}">Archive</button></div></td></tr>`));
+  const query=filter.toLowerCase();
+  const ps=state.products.filter(p=>[p.name,p.sku,p.source_sku].some(value=>value?.toLowerCase().includes(query))
+    &&(!category||p.category===category));
+  const pageSize=50, pages=Math.max(1,Math.ceil(ps.length/pageSize));
+  inventoryPage=Math.max(0,Math.min(inventoryPage,pages-1));
+  const visible=ps.slice(inventoryPage*pageSize,(inventoryPage+1)*pageSize);
+  const pagination=pages>1?`<div class="toolbar" aria-label="Inventory pages">
+    <button data-action="inventory-prev" ${inventoryPage===0?'disabled':''}>Previous</button>
+    <span>Page ${inventoryPage+1} of ${pages} · ${ps.length.toLocaleString('en-IN')} products</span>
+    <button data-action="inventory-next" ${inventoryPage===pages-1?'disabled':''}>Next</button>
+  </div>`:'';
+  return pagination+table(['Product','SKU','Category','Price','In stock','Storefront',''],visible.map(p=>`<tr><td><div style="display:flex;align-items:center;gap:10px"><img src="${productImgSrc(p)}" alt="" loading="lazy" referrerpolicy="no-referrer" style="width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid #e2e8f0"><div><b>${esc(p.name)}</b><small style="display:block">${esc((p.description||'').slice(0,50))}</small></div></div></td><td>${esc(p.sku)}</td><td><span class="categorypill">${esc(p.category||'Uncategorised')}</span></td><td>${money(p.price)}<small>+ ${p.tax}% tax</small></td><td>${status(p.stock<=p.reorder?'Low stock':'In stock')} <b>${p.stock}</b></td><td>${p.published?'Published':p.source_id?'Demo catalogue':'Hidden'}</td><td><div class="actions"><button data-action="product-edit" data-id="${p.id}">Edit</button><button data-action="stock" data-id="${p.id}">Stock</button><button data-action="archive" data-id="${p.id}" aria-label="Archive ${esc(p.name)}">Archive</button></div></td></tr>`));
 }
 
 function contacts(kind,title,desc){return heading(title,desc,btn(icon('plus')+' Add '+(kind==='customers'?'customer':'supplier'),kind+'-new',true))+`<section class="panel">${table(['Name','Phone','Email','Address',''],state[kind].map(c=>`<tr><td><b>${esc(c.name)}</b></td><td>${esc(c.phone)||'—'}</td><td>${esc(c.email)||'—'}</td><td>${esc(c.address)||'—'}</td><td><button data-action="${kind}-edit" data-id="${c.id}">Edit</button></td></tr>`))}</section>`}
@@ -461,9 +483,9 @@ function showCustomerHistory(id){const customer=state.customers.find(c=>c.id===i
 
 function productCards(ps,shop=false){
   if(!shop){
-    return ps.map((p,i)=>`<button class="product" data-action="add-cart" data-id="${p.id}" ${p.stock<1?'disabled':''}><div class="art"><img src="${productImgSrc(p)}" alt="${esc(p.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:8px"></div><div class="info"><small>${esc(p.category||'Art supplies')}</small><strong>${esc(p.name)}</strong><div class="bottom"><b>${money(p.price)}</b><small>${p.stock} left</small></div></div></button>`).join('')||empty('No products found','Add products in Inventory or try a different search.','<a class="button" href="#products">Open inventory</a>');
+    return ps.filter(p=>!p.source_id||p.stock>0).map((p,i)=>`<button class="product" data-action="add-cart" data-id="${p.id}" ${p.stock<1?'disabled':''}><div class="art"><img src="${productImgSrc(p)}" alt="${esc(p.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:8px"></div><div class="info"><small>${esc(p.category||'Art supplies')}</small><strong>${esc(p.name)}</strong><div class="bottom"><b>${money(p.price)}</b><small>${p.stock} left</small></div></div></button>`).join('')||empty('No products found','Add products in Inventory or try a different search.','<a class="button" href="#products">Open inventory</a>');
   }
-  if(!ps.length) return `<div class="art-empty">${icon('search')}<h3>No art materials found</h3><p>Try searching with different keywords or select another medium above.</p><a class="art-btn-secondary" href="/shop#home" style="display:inline-block;padding:10px 20px;margin-top:14px;text-decoration:none;font-weight:600">Explore all art supplies</a></div>`;
+  if(!ps.length) return `<div class="art-empty">${icon('search')}<h3>No art materials found</h3><p>Try searching with different keywords or select another medium above.</p><a class="art-btn-secondary" href="/legacy-shop#home" style="display:inline-block;padding:10px 20px;margin-top:14px;text-decoration:none;font-weight:600">Explore all art supplies</a></div>`;
   
   return ps.map((p,i)=>{
     const finalPrice=Math.round(p.price*(1+p.tax/100));
@@ -553,8 +575,8 @@ function drawCart(){
 
 function bindPage(){
   const s=$('#search'),c=$('#category'),ps=$('#pos-search'),pc=$('#pos-category'),os=$('#order-search'),sf=$('#status-filter'),d=$('#discount'),p=$('#payment');
-  if(s) s.oninput=e=>{filter=e.target.value;$('#product-table').innerHTML=productTable()};
-  if(c) c.onchange=e=>{category=e.target.value;$('#product-table').innerHTML=productTable()};
+  if(s) s.oninput=e=>{filter=e.target.value;inventoryPage=0;$('#product-table').innerHTML=productTable()};
+  if(c) c.onchange=e=>{category=e.target.value;inventoryPage=0;$('#product-table').innerHTML=productTable()};
   if(ps) ps.oninput=e=>filterPos();
   if(pc) pc.onchange=e=>filterPos();
   if(os) os.oninput=e=>filterOrders();
@@ -573,6 +595,38 @@ function bindPage(){
     toast('Settings updated');
     await refresh();
   };
+  const announcement = $('#announcement-form');
+  if (announcement) announcement.onsubmit = async event => {
+    event.preventDefault();
+    const values = Object.fromEntries(new FormData(announcement));
+    const button = event.submitter;
+    button.disabled = true;
+    try {
+      await api('storefront-settings', {...values, active: values.active === 'on'});
+      await refresh();
+      toast('Announcement saved');
+    } catch (error) {
+      announcement.querySelector('[role="alert"]').textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  };
+  const demoActivity = $('#demo-privilege-activity');
+  if (demoActivity) {
+    api('storefront-demo').then(reply => {
+      const activity = reply?.activity;
+      if (!activity || !demoActivity.isConnected) return;
+      demoActivity.innerHTML = '<h2>Demo Privilege requests</h2>' +
+        table(['Contact', 'Received'], activity.applications.map(r =>
+          `<tr><td>${esc(r.contact)}</td><td>${date(r.created)}</td></tr>`)) +
+        '<h2>Demo checkout orders</h2>' + table(['Reference', 'Type', 'Contact', 'Total', 'Payment'],
+          activity.orders.map(r => `<tr><td>${esc(r.reference)}</td><td>${esc(r.kind)}</td><td>${esc(r.contact)}</td><td>${money(r.total)}</td><td>${r.paid ? 'Simulated' : 'Due'}</td></tr>`));
+      demoActivity.hidden = false;
+    }).catch(error => {
+      demoActivity.textContent = error.message;
+      demoActivity.hidden = false;
+    });
+  }
   drawCart();
 }
 
@@ -596,9 +650,21 @@ function addCart(id){
   drawCart();
 }
 
+function merchandisingForm(p) {
+  return field('Brand','brand',p.brand) + field('Subcategory','subcategory',p.subcategory) +
+    field('Size / colour / variant','variant',p.variant) +
+    field('MRP (₹)','mrp',(p.mrp || 0)/100,'number','min="0" step="0.01"') +
+    '<label class="check wide"><input name="featured_discount" type="checkbox" ' + (p.featured_discount ? 'checked' : '') + '>Featured discount (20% or more)</label>' +
+    field('Price reference URL','reference_url',p.reference_url,'url') +
+    field('Price checked on','reference_date',p.reference_date,'date') +
+    field('Exact image source','image_source',p.image_source,'url') +
+    field('Image license / reuse permission','image_license',p.image_license) +
+    '<label class="check wide"><input name="image_verified" type="checkbox" ' + (p.image_verified ? 'checked' : '') + '>Exact product image and reuse permission verified</label>';
+}
+
 function productForm(id){
   let p=state.products.find(p=>p.id===id)||{};
-  modal(id?'Edit product':'Add a product',`<div class="formgrid">${field('Product name','name',p.name,'text','required maxlength="150"')}${field('SKU / barcode','sku',p.sku,'text','required')}${field('Category','category',p.category,'text','list="categories"')}<datalist id="categories">${['Paints & colours','Brushes','Canvas & paper','Drawing supplies','Studio accessories','Craft materials',...categories()].map(c=>`<option value="${esc(c)}">`).join('')}</datalist>${field('Selling price before tax','price',(p.price||0)/100,'number','min="0" step="0.01" required')}${field('Purchase cost','cost',(p.cost||0)/100,'number','min="0" step="0.01" required')}${select('Tax rate (%)','tax',[0,0.1,0.25,1,1.5,3,5,6,12,18,28,40].map(n=>[n,n+'%']),p.tax||0)}${!id?field('Opening stock','stock',0,'number','min="0" step="1" required'):''}${field('Reorder level','reorder',p.reorder??5,'number','min="0" step="1" required')}${field('Product Image Path','image',p.image||'','text','placeholder="/images/acrylic-red.jpg"')}<label class="wide">Description<textarea name="description">${esc(p.description)}</textarea></label><label class="check wide"><input name="published" type="checkbox" ${p.published!==0?'checked':''}>Visible in online store</label></div>`,d=>api('products',{...d,id,published:d.published==='on'}),'Save product');
+  modal(id?'Edit product':'Add a product',`<div class="formgrid">${field('Product name','name',p.name,'text','required maxlength="150"')}${field('SKU / barcode','sku',p.sku,'text','required')}${field('Category','category',p.category,'text','list="categories"')}<datalist id="categories">${['Paints & colours','Brushes','Canvas & paper','Drawing supplies','Studio accessories','Craft materials',...categories()].map(c=>`<option value="${esc(c)}">`).join('')}</datalist>${field('Selling price before tax','price',(p.price||0)/100,'number','min="0" step="0.01" required')}${field('Purchase cost','cost',(p.cost||0)/100,'number','min="0" step="0.01" required')}${select('Tax rate (%)','tax',[0,0.1,0.25,1,1.5,3,5,6,12,18,28,40].map(n=>[n,n+'%']),p.tax||0)}${!id?field('Opening stock','stock',0,'number','min="0" step="1" required'):''}${field('Reorder level','reorder',p.reorder??5,'number','min="0" step="1" required')}${field('Product Image Path','image',p.image||'','text','placeholder="/storefront/media/product.webp"')}${merchandisingForm(p)}<label class="wide">Description<textarea name="description">${esc(p.description)}</textarea></label><label class="check wide"><input name="published" type="checkbox" ${p.published!==0?'checked':''}>Visible in online store</label></div>`,d=>api('products',{...d,id,published:d.published==='on',featured_discount:d.featured_discount==='on',image_verified:d.image_verified==='on'}),'Save product');
 }
 
 function cardForm(id){
@@ -637,6 +703,12 @@ document.addEventListener('click',async e=>{
     if(a==='logout'){await api('logout',{});state={};cart=[];held=null;appliedCard=null;return start()}
     if(a==='product-new')return productForm();
     if(a==='product-edit')return productForm(id);
+    if(a==='inventory-prev'||a==='inventory-next'){
+      inventoryPage+=a==='inventory-prev'?-1:1;
+      $('#product-table').innerHTML=productTable();
+      (document.querySelector(`[data-action="${a}"]:not(:disabled)`)||$('#search'))?.focus();
+      return;
+    }
     if(a==='card-new'||a==='card-edit')return cardForm(id);
     if(a==='apply-card'){
       b.disabled=true;
@@ -774,7 +846,7 @@ function renderShopHeader(s, cartCount){
   return `
   <header class="art-header">
     <div class="art-header-top">
-      <a href="/shop#home" class="art-brand" aria-label="Guptha Arts Home">
+      <a href="/legacy-shop#home" class="art-brand" aria-label="Guptha Arts Home">
         <span class="art-brand-mark">${icon('brush')}</span>
         <div class="art-brand-text">
           <strong>Guptha Arts Atelier</strong>
@@ -820,9 +892,9 @@ function renderShopHeader(s, cartCount){
     <!-- Atelier Mediums Navigation -->
     <nav class="art-subnav" aria-label="Medium navigation">
       <div class="art-subnav-links">
-        <a href="/shop#home" data-action="shop-cat-filter" data-cat="" class="${!shopCategoryFilter?'active':''}">All Materials</a>
+        <a href="/legacy-shop#home" data-action="shop-cat-filter" data-cat="" class="${!shopCategoryFilter?'active':''}">All Materials</a>
         ${cats.map(c=>`
-          <a href="/shop#home" data-action="shop-cat-filter" data-cat="${esc(c)}" class="${shopCategoryFilter===c?'active':''}">${esc(c)}</a>
+          <a href="/legacy-shop#home" data-action="shop-cat-filter" data-cat="${esc(c)}" class="${shopCategoryFilter===c?'active':''}">${esc(c)}</a>
         `).join('')}
       </div>
       <div class="art-subnav-guarantee">
@@ -917,11 +989,11 @@ function renderProductPage(s, pid){
 
   return `
   <nav class="art-breadcrumb" aria-label="Breadcrumb">
-    <a href="/shop#home">&larr; Back to collection</a>
+    <a href="/legacy-shop#home">&larr; Back to collection</a>
     <span class="art-bc-divider">/</span>
-    <a href="/shop#home">Home</a>
+    <a href="/legacy-shop#home">Home</a>
     <span class="art-bc-divider">/</span>
-    <a href="/shop#home" data-action="shop-cat-filter" data-cat="${esc(p.category)}">${esc(p.category||'Fine Art Materials')}</a>
+    <a href="/legacy-shop#home" data-action="shop-cat-filter" data-cat="${esc(p.category)}">${esc(p.category||'Fine Art Materials')}</a>
     <span class="art-bc-divider">/</span>
     <span class="current">${esc(p.name)}</span>
   </nav>
@@ -1005,7 +1077,7 @@ function renderCartPage(s){
       <div class="art-empty-card">
         <h2>Your Studio Basket is empty</h2>
         <p>Explore our collection of artist watercolours, acrylics, canvas boards, and sketching supplies.</p>
-        <a href="/shop#home" class="art-btn-primary" style="display:inline-block;padding:12px 28px;text-decoration:none;margin-top:16px">Browse Catalog</a>
+        <a href="/legacy-shop#home" class="art-btn-primary" style="display:inline-block;padding:12px 28px;text-decoration:none;margin-top:16px">Browse Catalog</a>
       </div>
     </div>`;
   }
@@ -1091,7 +1163,7 @@ function renderCheckoutPage(s){
       <div class="art-empty-card">
         <h2>Your basket is empty</h2>
         <p>Add art materials to your basket before checking out.</p>
-        <a href="/shop#home" class="art-btn-primary" style="display:inline-block;padding:12px 28px;text-decoration:none;margin-top:16px">Explore Art Supplies</a>
+        <a href="/legacy-shop#home" class="art-btn-primary" style="display:inline-block;padding:12px 28px;text-decoration:none;margin-top:16px">Explore Art Supplies</a>
       </div>
     </div>`;
   }
@@ -1099,7 +1171,7 @@ function renderCheckoutPage(s){
   return `
   <div class="art-checkout-wrapper">
     <div class="art-checkout-head">
-      <a href="/shop#home" class="art-checkout-back">&larr; Return to Studio Store</a>
+      <a href="/legacy-shop#home" class="art-checkout-back">&larr; Return to Studio Store</a>
       <h1>Studio Checkout (${count} item${count>1?'s':''})</h1>
       <span class="art-secure-badge">${icon('lock')} Encrypted Checkout</span>
     </div>
@@ -1211,7 +1283,7 @@ function renderOrderSuccessPage(s){
       </div>
 
       <div class="art-success-actions">
-        <a href="/shop#home" class="art-btn-primary" style="display:inline-block;padding:12px 28px;text-decoration:none">
+        <a href="/legacy-shop#home" class="art-btn-primary" style="display:inline-block;padding:12px 28px;text-decoration:none">
           Continue Browsing
         </a>
         <a href="/" class="art-btn-secondary" style="display:inline-block;padding:12px 20px;text-decoration:none">
@@ -1232,10 +1304,10 @@ function renderShopFooter(s){
       </div>
       <div class="art-footer-col">
         <h4>Mediums</h4>
-        <a href="/shop#home" data-action="shop-cat-filter" data-cat="Paints & colours">Paints &amp; Colours</a>
-        <a href="/shop#home" data-action="shop-cat-filter" data-cat="Brushes">Studio Brushes</a>
-        <a href="/shop#home" data-action="shop-cat-filter" data-cat="Canvas & paper">Canvas &amp; Paper</a>
-        <a href="/shop#home" data-action="shop-cat-filter" data-cat="Drawing supplies">Drawing Supplies</a>
+        <a href="/legacy-shop#home" data-action="shop-cat-filter" data-cat="Paints & colours">Paints &amp; Colours</a>
+        <a href="/legacy-shop#home" data-action="shop-cat-filter" data-cat="Brushes">Studio Brushes</a>
+        <a href="/legacy-shop#home" data-action="shop-cat-filter" data-cat="Canvas & paper">Canvas &amp; Paper</a>
+        <a href="/legacy-shop#home" data-action="shop-cat-filter" data-cat="Drawing supplies">Drawing Supplies</a>
       </div>
       <div class="art-footer-col">
         <h4>Studio Location</h4>

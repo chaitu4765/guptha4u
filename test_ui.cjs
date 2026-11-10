@@ -100,7 +100,7 @@ let browser;
   }
   const guest = await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
   const shop = await guest.newPage(); shop.on('pageerror',e=>errors.push(e.message));
-  await shop.goto(base+'/shop');
+  await shop.goto(base+'/legacy-shop');
   await shop.getByRole('button',{name:/Test acrylic colours/}).waitFor();
   assert.equal(await shop.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Mobile shop overflow');
   await shop.screenshot({path:'artifacts/shop-mobile.png',fullPage:true});

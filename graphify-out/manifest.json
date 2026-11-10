@@ -1,0 +1,572 @@
+{
+  ".planning/config.json": {
+    "mtime": 1794208381.8210711,
+    "seen": 1794209262.4354854,
+    "ast_hash": "13a39e08ef724a0d79acc17f3c31dc61",
+    "semantic_hash": ""
+  },
+  "components/footer.tsx": {
+    "mtime": 1794057663.0697699,
+    "seen": 1794209262.4354854,
+    "ast_hash": "9c7121dc174f0edf68236ce2ccbdb8cb",
+    "semantic_hash": ""
+  },
+  "components/storefront.ts": {
+    "mtime": 1794057663.4342875,
+    "seen": 1794209262.4354854,
+    "ast_hash": "eee384e3f2950252a5040ebb668ed527",
+    "semantic_hash": ""
+  },
+  "components/ui/doodle-crew-footer.tsx": {
+    "mtime": 1794057325.389567,
+    "seen": 1794209262.4354854,
+    "ast_hash": "a91da03edabf35099dcf0ce4d523b99a",
+    "semantic_hash": ""
+  },
+  "enrich_demo.py": {
+    "mtime": 1794027406.5670702,
+    "seen": 1794209262.4354854,
+    "ast_hash": "6779e788b94d76325de12664dab50096",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1794057027.8040154,
+    "seen": 1794209262.4354854,
+    "ast_hash": "23f24ad3a6e7a77e94c8df8166a5c5ff",
+    "semantic_hash": ""
+  },
+  "public/app.js": {
+    "mtime": 1794027775.655327,
+    "seen": 1794209262.4354854,
+    "ast_hash": "792d97f121fed4414c49f2701fc9ca1f",
+    "semantic_hash": ""
+  },
+  "public/storefront/store.js": {
+    "mtime": 1794057910.912167,
+    "seen": 1794209262.4354854,
+    "ast_hash": "fa6b0bd51519941cbfa6e51c233863bf",
+    "semantic_hash": ""
+  },
+  "public/storefront/studio.js": {
+    "mtime": 1794027176.896126,
+    "seen": 1794209262.4354854,
+    "ast_hash": "60da459fb44cc3866c878020796faca2",
+    "semantic_hash": ""
+  },
+  "public/storefront/vendor/footer.js": {
+    "mtime": 1794057689.248259,
+    "seen": 1794209262.4354854,
+    "ast_hash": "7ea4db94de6b3fd43ce97d00a8b25601",
+    "semantic_hash": ""
+  },
+  "public/storefront/vendor/model-viewer-4.4.0.min.js": {
+    "mtime": 499162500.0,
+    "seen": 1794209262.4354854,
+    "ast_hash": "ceb0a122a31ea2b8dfd07daa46d16455",
+    "semantic_hash": ""
+  },
+  "public/storefront/vendor/storefront.js": {
+    "mtime": 1794057689.2472446,
+    "seen": 1794209262.4354854,
+    "ast_hash": "9a44cddac5ba8d0ab5da04be01679efb",
+    "semantic_hash": ""
+  },
+  "reference/demo-products.json": {
+    "mtime": 1794023262.9784856,
+    "seen": 1794209262.4354854,
+    "ast_hash": "f6dfb88a83760e1321676c794be16867",
+    "semantic_hash": ""
+  },
+  "reference/site.js": {
+    "mtime": 1793985370.0153475,
+    "seen": 1794209262.4354854,
+    "ast_hash": "e1ddb3d43f917c9e1786b032c94942de",
+    "semantic_hash": ""
+  },
+  "seed_demo.py": {
+    "mtime": 1794020556.2674701,
+    "seen": 1794209262.4354854,
+    "ast_hash": "c00f931ab61314ca9e47c22cf4797891",
+    "semantic_hash": ""
+  },
+  "server.py": {
+    "mtime": 1794026804.9290926,
+    "seen": 1794209262.4354854,
+    "ast_hash": "3ff013b27054e6219c3f63e3fbab274e",
+    "semantic_hash": ""
+  },
+  "storefront.py": {
+    "mtime": 1794057663.9549253,
+    "seen": 1794209262.4354854,
+    "ast_hash": "6f3e88ebc389b17d303d5df9aeb3c3ce",
+    "semantic_hash": ""
+  },
+  "storefront_search.py": {
+    "mtime": 1794027713.7309403,
+    "seen": 1794209262.4354854,
+    "ast_hash": "2168b189c0f18dc9ef32d0e7106f9973",
+    "semantic_hash": ""
+  },
+  "test_storefront.py": {
+    "mtime": 1794021197.5029361,
+    "seen": 1794209262.4354854,
+    "ast_hash": "1b5b2811e9b6971818479b1a33f87d70",
+    "semantic_hash": ""
+  },
+  "test_storefront_browser.js": {
+    "mtime": 1794028310.8836436,
+    "seen": 1794209262.4354854,
+    "ast_hash": "75e7016ac5d2294bbd6d118561630fb1",
+    "semantic_hash": ""
+  },
+  "test_ui.cjs": {
+    "mtime": 1793986726.350561,
+    "seen": 1794209262.4354854,
+    "ast_hash": "72c0bd091692b769fe39490f662072d3",
+    "semantic_hash": ""
+  },
+  "test_workflows.py": {
+    "mtime": 1793985370.026446,
+    "seen": 1794209262.4354854,
+    "ast_hash": "22dd0ea1e1d82c82dfe30ec4dea193c7",
+    "semantic_hash": ""
+  },
+  "tools/build_studio_scene.py": {
+    "mtime": 1794020866.9839556,
+    "seen": 1794209262.4354854,
+    "ast_hash": "607dd55a06d410f8c9ded00d9b277950",
+    "semantic_hash": ""
+  },
+  "tools/import_himalaya.py": {
+    "mtime": 1794027981.2230864,
+    "seen": 1794209262.4354854,
+    "ast_hash": "0debe2a41dc037ac74942bdd47657b4a",
+    "semantic_hash": ""
+  },
+  "tools/render_studio.py": {
+    "mtime": 1794021439.8915346,
+    "seen": 1794209262.4354854,
+    "ast_hash": "4e616ecf68085b63ff3059e061db3b62",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1794057662.688852,
+    "seen": 1794209262.4354854,
+    "ast_hash": "b824dd451c6fa1c55bde0f2b5b2cba53",
+    "semantic_hash": ""
+  },
+  "DESIGN.md": {
+    "mtime": 1793985369.6494427,
+    "seen": 1794209262.4354854,
+    "ast_hash": "c1100b25e59a76e74398e013bc08c43a",
+    "semantic_hash": ""
+  },
+  "PRODUCT.md": {
+    "mtime": 1793985369.6547318,
+    "seen": 1794209262.4354854,
+    "ast_hash": "d4cb7a8359755f595968148bb46de0b5",
+    "semantic_hash": ""
+  },
+  "PRODUCT_IMAGE_AUDIT.md": {
+    "mtime": 1794057978.5171483,
+    "seen": 1794209262.4354854,
+    "ast_hash": "75aa9a2f19d495b638535ebcb8d4b421",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1794021198.0993907,
+    "seen": 1794209262.4354854,
+    "ast_hash": "dba47914c047142417c87bd624fcb988",
+    "semantic_hash": ""
+  },
+  "STOREFRONT_DEPLOYMENT.md": {
+    "mtime": 1794057978.1468675,
+    "seen": 1794209262.4354854,
+    "ast_hash": "75d5dd893f0b6340b9bb07a629c3458c",
+    "semantic_hash": ""
+  },
+  "STOREFRONT_DESIGN.md": {
+    "mtime": 1794028259.3789864,
+    "seen": 1794209262.4354854,
+    "ast_hash": "f4505610f7bed343ec6dd5ad13f9cc1e",
+    "semantic_hash": ""
+  },
+  "public/index.html": {
+    "mtime": 1793988022.8902066,
+    "seen": 1794209262.4354854,
+    "ast_hash": "09622a0d4b7d53811258ab04422feb3b",
+    "semantic_hash": ""
+  },
+  "public/storefront/fonts/caveat-OFL.txt": {
+    "mtime": 1794020489.1140087,
+    "seen": 1794209262.4354854,
+    "ast_hash": "f041ff6e4f093a88573d3306e41037af",
+    "semantic_hash": ""
+  },
+  "public/storefront/fonts/dm-serif-display-OFL.txt": {
+    "mtime": 1793986703.9807284,
+    "seen": 1794209262.4354854,
+    "ast_hash": "8ee38e6524d8ab677154ae191b9208c0",
+    "semantic_hash": ""
+  },
+  "public/storefront/fonts/manrope-OFL.txt": {
+    "mtime": 1793986704.806639,
+    "seen": 1794209262.4354854,
+    "ast_hash": "a216ac8723e9b95b204d3bc619ebcabd",
+    "semantic_hash": ""
+  },
+  "public/storefront/vendor/model-viewer-LICENSE.txt": {
+    "mtime": 499162500.0,
+    "seen": 1794209262.4354854,
+    "ast_hash": "3b83ef96387f14655fc854ddc3c6bd57",
+    "semantic_hash": ""
+  },
+  "reference-home.html": {
+    "mtime": 1793985370.0084434,
+    "seen": 1794209262.4354854,
+    "ast_hash": "626137e4e76c49c7d6ee0bab84cb08ab",
+    "semantic_hash": ""
+  },
+  "reference/VERIFICATION.md": {
+    "mtime": 1794021534.3638794,
+    "seen": 1794209262.4354854,
+    "ast_hash": "95862facf49a1401d98df4e1a3f42be7",
+    "semantic_hash": ""
+  },
+  "artifacts/amazon-cart.png": {
+    "mtime": 1793985369.668491,
+    "seen": 1794209262.4354854,
+    "ast_hash": "56cd964211ad68cc1c2aa4f123793513",
+    "semantic_hash": ""
+  },
+  "artifacts/amazon-checkout.png": {
+    "mtime": 1793985369.6787283,
+    "seen": 1794209262.4354854,
+    "ast_hash": "82d4d55c38d0c82adad2fde53e2188c9",
+    "semantic_hash": ""
+  },
+  "artifacts/amazon-home.png": {
+    "mtime": 1793985369.6837907,
+    "seen": 1794209262.4354854,
+    "ast_hash": "8d1734ea3747b3225eaab3571facf4ea",
+    "semantic_hash": ""
+  },
+  "artifacts/amazon-pdp.png": {
+    "mtime": 1793985369.6918917,
+    "seen": 1794209262.4354854,
+    "ast_hash": "752632b4a250e2c11627a4ea38aab9b2",
+    "semantic_hash": ""
+  },
+  "artifacts/dashboard.png": {
+    "mtime": 1793985369.7005856,
+    "seen": 1794209262.4354854,
+    "ast_hash": "438ce21195d41b57607cb227fd096484",
+    "semantic_hash": ""
+  },
+  "artifacts/pos.png": {
+    "mtime": 1793985369.7082894,
+    "seen": 1794209262.4354854,
+    "ast_hash": "2708b03c6cacecb7dbb1d05a06036fd0",
+    "semantic_hash": ""
+  },
+  "artifacts/shop-mobile.png": {
+    "mtime": 1793985369.7253468,
+    "seen": 1794209262.4354854,
+    "ast_hash": "33ab93d3bb0750b6c8599a674b1b256f",
+    "semantic_hash": ""
+  },
+  "artifacts/storefront-concept-v1.png": {
+    "mtime": 1794019734.4559326,
+    "seen": 1794209262.4354854,
+    "ast_hash": "2aa77ed2532fc472e857b7a9baf09e5b",
+    "semantic_hash": ""
+  },
+  "artifacts/studio-brushes.png": {
+    "mtime": 1794021501.0698993,
+    "seen": 1794209262.4354854,
+    "ast_hash": "85a97c562e7a6a0b4d87c2324bff20f7",
+    "semantic_hash": ""
+  },
+  "artifacts/studio-desktop.png": {
+    "mtime": 1794021500.2108152,
+    "seen": 1794209262.4354854,
+    "ast_hash": "6ab996a9aa1d157a83b9a189d00edc20",
+    "semantic_hash": ""
+  },
+  "artifacts/studio-mobile.png": {
+    "mtime": 1794021501.6795106,
+    "seen": 1794209262.4354854,
+    "ast_hash": "5072f32f79545bdaa29dfba33e3e19f1",
+    "semantic_hash": ""
+  },
+  "public/images/acrylic-black.jpg": {
+    "mtime": 1793985369.7500753,
+    "seen": 1794209262.4354854,
+    "ast_hash": "be0e639ac147aa75b4589ad909dad9a7",
+    "semantic_hash": ""
+  },
+  "public/images/acrylic-red.jpg": {
+    "mtime": 1793985369.7637343,
+    "seen": 1794209262.4354854,
+    "ast_hash": "1767df629ee85e91f8de570af31079be",
+    "semantic_hash": ""
+  },
+  "public/images/acrylic-white.jpg": {
+    "mtime": 1793985369.7781775,
+    "seen": 1794209262.4354854,
+    "ast_hash": "a3b29dd016c68e991b3bbe6cd1f42ad3",
+    "semantic_hash": ""
+  },
+  "public/images/brushes-set.jpg": {
+    "mtime": 1793985369.7980661,
+    "seen": 1794209262.4354854,
+    "ast_hash": "e3659e626de147ffbfa4bbe2f703006a",
+    "semantic_hash": ""
+  },
+  "public/images/canvas-board.jpg": {
+    "mtime": 1793985369.8115954,
+    "seen": 1794209262.4354854,
+    "ast_hash": "a7d63d9fd1bd4f785001ef7a9d8318c7",
+    "semantic_hash": ""
+  },
+  "public/images/canvas-stretched.jpg": {
+    "mtime": 1793985369.825711,
+    "seen": 1794209262.4354854,
+    "ast_hash": "5107131f81a50613cae08391ed52af4c",
+    "semantic_hash": ""
+  },
+  "public/images/easel.jpg": {
+    "mtime": 1793985369.83732,
+    "seen": 1794209262.4354854,
+    "ast_hash": "bce3685ffd7aaebc65f7cbc87b591a9f",
+    "semantic_hash": ""
+  },
+  "public/images/fineliners.jpg": {
+    "mtime": 1793985369.8516762,
+    "seen": 1794209262.4354854,
+    "ast_hash": "5877c2b693fcc0183ba531ddfb460ca2",
+    "semantic_hash": ""
+  },
+  "public/images/flat-brushes.jpg": {
+    "mtime": 1793985369.8816757,
+    "seen": 1794209262.4354854,
+    "ast_hash": "cf773e4196b713f18f37fd1e841b6420",
+    "semantic_hash": ""
+  },
+  "public/images/sketchbook.jpg": {
+    "mtime": 1793985369.912243,
+    "seen": 1794209262.4354854,
+    "ast_hash": "cee124f9dcbcb3f7b29f1709db2f543f",
+    "semantic_hash": ""
+  },
+  "public/images/watercolor-blue.jpg": {
+    "mtime": 1793985369.9463756,
+    "seen": 1794209262.4354854,
+    "ast_hash": "973350b56ba1b74fdec8fcb3a16669f7",
+    "semantic_hash": ""
+  },
+  "public/images/watercolor-green.jpg": {
+    "mtime": 1793985369.9647553,
+    "seen": 1794209262.4354854,
+    "ast_hash": "ac0c47d43e35c15dfe1d4a06e5afc674",
+    "semantic_hash": ""
+  },
+  "public/images/watercolor-pad.jpg": {
+    "mtime": 1793985369.9798598,
+    "seen": 1794209262.4354854,
+    "ast_hash": "cee124f9dcbcb3f7b29f1709db2f543f",
+    "semantic_hash": ""
+  },
+  "public/images/watercolor-yellow.jpg": {
+    "mtime": 1793985369.9954674,
+    "seen": 1794209262.4354854,
+    "ast_hash": "20955b367054ffd6b27750189de278a6",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/accessories-small.webp": {
+    "mtime": 1794021376.3933148,
+    "seen": 1794209262.4354854,
+    "ast_hash": "508711f7242c0f048261e1072042bcf9",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/accessories.webp": {
+    "mtime": 1794021376.2214355,
+    "seen": 1794209262.4354854,
+    "ast_hash": "e5919a39324908d0cc380b60ffa36a5f",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/brands-small.webp": {
+    "mtime": 1794021376.7762148,
+    "seen": 1794209262.4354854,
+    "ast_hash": "ee37252d99d1b734168e8bda931f9c6b",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/brands.webp": {
+    "mtime": 1794021376.577958,
+    "seen": 1794209262.4354854,
+    "ast_hash": "c20ae761be7f24cd006784361c66c674",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/brushes-small.webp": {
+    "mtime": 1794021377.0839806,
+    "seen": 1794209262.4354854,
+    "ast_hash": "a2d62ff414141b9cb27d86fe4e170ab3",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/brushes.webp": {
+    "mtime": 1794021376.939442,
+    "seen": 1794209262.4354854,
+    "ast_hash": "5951a34eec87d7192766b8e955cb9f48",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/canvas-small.webp": {
+    "mtime": 1794021377.4152322,
+    "seen": 1794209262.4354854,
+    "ast_hash": "ca7dc46a846ec646bf6920ecd1c95738",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/canvas.webp": {
+    "mtime": 1794021377.257215,
+    "seen": 1794209262.4364896,
+    "ast_hash": "52e1aea7e10c2ac94c7d10df73c94571",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/drawing-small.webp": {
+    "mtime": 1794021377.7637932,
+    "seen": 1794209262.4364896,
+    "ast_hash": "a05cd883247240eab4d6e4ecf065f504",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/drawing.webp": {
+    "mtime": 1794021377.5845177,
+    "seen": 1794209262.4364896,
+    "ast_hash": "c26d4a18f62bd761c9ab50c741164c5b",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/easels-small.webp": {
+    "mtime": 1794021378.085713,
+    "seen": 1794209262.4364896,
+    "ast_hash": "ee15ae1ef9b8ee72eeb7e915876f8bf2",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/easels.webp": {
+    "mtime": 1794021377.9230237,
+    "seen": 1794209262.4364896,
+    "ast_hash": "0c7b676af7acba2a9475d993b40cf53b",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/paints-small.webp": {
+    "mtime": 1794021378.454963,
+    "seen": 1794209262.4364896,
+    "ast_hash": "bed70a6a87a38b3f3dec52420c17588c",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/paints.webp": {
+    "mtime": 1794021378.285127,
+    "seen": 1794209262.4364896,
+    "ast_hash": "a773de18bea95a2f10c1ecbbb431318e",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/papers-small.webp": {
+    "mtime": 1794021378.7612977,
+    "seen": 1794209262.4364896,
+    "ast_hash": "218fc2a9d385451726b8ef165aab831b",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/papers.webp": {
+    "mtime": 1794021378.627719,
+    "seen": 1794209262.4364896,
+    "ast_hash": "1a3630899651df237b669a765cefa485",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/studio-room.webp": {
+    "mtime": 1794020491.5471363,
+    "seen": 1794209262.4364896,
+    "ast_hash": "f2734c8662d5f7975014e2cf82cd93bc",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/studio-small.webp": {
+    "mtime": 1794021379.4360151,
+    "seen": 1794209262.4364896,
+    "ast_hash": "61bf7edc6a56aaa324ee17267fc554d7",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/studio-v2-accessories.webp": {
+    "mtime": 1794027017.5765615,
+    "seen": 1794209262.4364896,
+    "ast_hash": "d1c25b8c861d8c40521029e316500622",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/studio-v2-brands.webp": {
+    "mtime": 1794027017.8976219,
+    "seen": 1794209262.4364896,
+    "ast_hash": "ccba962961c79b268f1cb92e838e8c30",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/studio-v2-brushes.webp": {
+    "mtime": 1794027016.025126,
+    "seen": 1794209262.4364896,
+    "ast_hash": "03ba6e8cd04b85dee6093fde14023027",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/studio-v2-canvas.webp": {
+    "mtime": 1794027016.3440168,
+    "seen": 1794209262.4364896,
+    "ast_hash": "2a2c2b773c78bdcd74ed53767e0660e1",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/studio-v2-drawing.webp": {
+    "mtime": 1794027016.948039,
+    "seen": 1794209262.4364896,
+    "ast_hash": "78b9e3c25b90a9ee5503c59601f12ce7",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/studio-v2-easels.webp": {
+    "mtime": 1794027016.6582048,
+    "seen": 1794209262.4364896,
+    "ast_hash": "ecc0e9dde980dfbaece106aef6fcbafe",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/studio-v2-paints.webp": {
+    "mtime": 1794027015.7122254,
+    "seen": 1794209262.4364896,
+    "ast_hash": "a9de61ef66587a230f4465fbe6709845",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/studio-v2-papers.webp": {
+    "mtime": 1794027017.2465973,
+    "seen": 1794209262.4364896,
+    "ast_hash": "ca81e511414fa7eed6a907b3295fc3fb",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/studio-v2.webp": {
+    "mtime": 1794027015.3648188,
+    "seen": 1794209262.4364896,
+    "ast_hash": "e095e18b82908a6d144e3d129055de20",
+    "semantic_hash": ""
+  },
+  "public/storefront/art/studio.webp": {
+    "mtime": 1794021379.135528,
+    "seen": 1794209262.4364896,
+    "ast_hash": "18f8406263548dfda86c4562ddd1dd41",
+    "semantic_hash": ""
+  },
+  "public/storefront/favicon.svg": {
+    "mtime": 1793986874.9066293,
+    "seen": 1794209262.4364896,
+    "ast_hash": "9d497c23b2db998b6aef7d7139aca014",
+    "semantic_hash": ""
+  },
+  "public/storefront/placeholder.svg": {
+    "mtime": 1793986874.9046264,
+    "seen": 1794209262.4364896,
+    "ast_hash": "74233e0679e6192462a0b94de8ec7374",
+    "semantic_hash": ""
+  },
+  "package-lock.json": {
+    "mtime": 1794057027.8174021,
+    "seen": 1794209262.4364896,
+    "ast_hash": "13bb7eb8c0a2dc71ce4dcac5e23634cc",
+    "semantic_hash": ""
+  }
+}
