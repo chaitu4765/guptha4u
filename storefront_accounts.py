@@ -14,6 +14,7 @@ import sqlite3
 import time
 from urllib.parse import urlencode, urlsplit
 from urllib.request import Request, urlopen
+from storefront_hosted import HOSTED_DEMO, connect_hosted
 
 
 SESSION_COOKIE = 'gupta_customer'
@@ -62,11 +63,32 @@ def provider_config(name, origin):
 
 
 def demo_credentials_enabled(origin):
-    return (urlsplit(origin).hostname in {'localhost', '127.0.0.1', '::1'}
+    return HOSTED_DEMO or (urlsplit(origin).hostname in {'localhost', '127.0.0.1', '::1'}
             and bool(os.environ.get('GUPTHA_ACCOUNTS_DB') and os.environ.get('GUPTHA_DEMO_CHECKOUT_DB')))
 
 
+ACCOUNT_SCHEMA = """
+            CREATE TABLE IF NOT EXISTS customers_online (
+                id TEXT PRIMARY KEY, provider TEXT NOT NULL, subject TEXT NOT NULL,
+                name TEXT NOT NULL, email TEXT NOT NULL, UNIQUE(provider,subject)
+            );
+            CREATE TABLE IF NOT EXISTS customer_sessions (
+                token TEXT PRIMARY KEY, account_id TEXT NOT NULL, expires BIGINT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS customer_passwords (
+                account_id TEXT PRIMARY KEY REFERENCES customers_online(id),
+                salt TEXT NOT NULL, hash TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS customer_login_states (
+                state TEXT PRIMARY KEY, binding TEXT NOT NULL, provider TEXT NOT NULL,
+                nonce TEXT NOT NULL, expires BIGINT NOT NULL
+            );
+"""
+
+
 def connect_accounts():
+    if HOSTED_DEMO:
+        return connect_hosted(ACCOUNT_SCHEMA)
     path = Path(os.environ['GUPTHA_ACCOUNTS_DB']).resolve()
     catalogue = Path(os.environ.get('GUPTHA_DB', Path(__file__).parent / 'data/retail.sqlite3')).resolve()
     checkout = os.environ.get('GUPTHA_DEMO_CHECKOUT_DB')
@@ -76,23 +98,7 @@ def connect_accounts():
     conn = sqlite3.connect(path, timeout=5)
     conn.row_factory = sqlite3.Row
     try:
-        conn.executescript("""
-            CREATE TABLE IF NOT EXISTS customers_online (
-                id TEXT PRIMARY KEY, provider TEXT NOT NULL, subject TEXT NOT NULL,
-                name TEXT NOT NULL, email TEXT NOT NULL, UNIQUE(provider,subject)
-            );
-            CREATE TABLE IF NOT EXISTS customer_sessions (
-                token TEXT PRIMARY KEY, account_id TEXT NOT NULL, expires INTEGER NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS customer_passwords (
-                account_id TEXT PRIMARY KEY REFERENCES customers_online(id),
-                salt TEXT NOT NULL, hash TEXT NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS customer_login_states (
-                state TEXT PRIMARY KEY, binding TEXT NOT NULL, provider TEXT NOT NULL,
-                nonce TEXT NOT NULL, expires INTEGER NOT NULL
-            );
-        """)
+        conn.executescript(ACCOUNT_SCHEMA)
     except sqlite3.DatabaseError:
         conn.close()
         raise
@@ -101,7 +107,7 @@ def connect_accounts():
 
 def current_account(raw):
     token = cookies(raw).get(SESSION_COOKIE, '')
-    if not TOKEN_PATTERN.fullmatch(token) or not os.environ.get('GUPTHA_ACCOUNTS_DB'):
+    if not TOKEN_PATTERN.fullmatch(token) or not (HOSTED_DEMO or os.environ.get('GUPTHA_ACCOUNTS_DB')):
         return None
     with closing(connect_accounts()) as conn:
         row = conn.execute('''SELECT a.id,a.provider,a.name,a.email FROM customers_online a
@@ -134,10 +140,10 @@ def email_session(signup, fields, raw, origin):
             account_id = secrets.token_hex(16)
             salt = secrets.token_hex(16)
             value = pbkdf2_hmac('sha256', password.encode(), bytes.fromhex(salt), 600000).hex()
-            try:
-                conn.execute('INSERT INTO customers_online VALUES(?,?,?,?,?)', (account_id, 'demo', email, name, email))
-            except sqlite3.IntegrityError:
-                raise ValueError('This demo account already exists. Sign in to continue.') from None
+            inserted = conn.execute('''INSERT INTO customers_online VALUES(?,?,?,?,?)
+                ON CONFLICT(provider,subject) DO NOTHING''', (account_id, 'demo', email, name, email))
+            if not inserted.rowcount:
+                raise ValueError('This demo account already exists. Sign in to continue.')
             conn.execute('INSERT INTO customer_passwords VALUES(?,?,?)', (account_id, salt, value))
         else:
             found = conn.execute('''SELECT a.id,p.salt,p.hash FROM customers_online a
@@ -225,7 +231,7 @@ def finish(provider, origin, config, fields, raw):
 
 def sign_out(raw, origin):
     token = cookies(raw).get(SESSION_COOKIE, '')
-    if TOKEN_PATTERN.fullmatch(token) and os.environ.get('GUPTHA_ACCOUNTS_DB'):
+    if TOKEN_PATTERN.fullmatch(token) and (HOSTED_DEMO or os.environ.get('GUPTHA_ACCOUNTS_DB')):
         with closing(connect_accounts()) as conn, conn:
             conn.execute('DELETE FROM customer_sessions WHERE token=?', (digest(token),))
     return cookie(SESSION_COOKIE, '', origin, 0)

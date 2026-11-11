@@ -30,8 +30,12 @@
 .account-dashboard > p, .account-dashboard > h2 { margin-top: 20px; }
 .account-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-block: 24px 36px; }
 .account-orders { list-style: none; padding: 0; max-width: 720px; }
-.account-orders li { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px 24px; border-bottom: 1px solid var(--color-line); padding-block: 16px; }
-.account-orders span { color: var(--color-secondary-on-muted); }
+.account-orders > li { border-bottom: 1px solid var(--color-line); padding-block: 16px; }
+.order-heading, .order-items li { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 6px 20px; }
+.order-items { list-style: none; padding: 0; margin-block: 12px; }
+.order-items li + li { margin-top: 8px; }
+.order-items small { margin-right: auto; }
+.account-orders :is(time, small, span) { color: var(--color-secondary-on-muted); }
 @media (max-width: 740px) {
   .account-shell { grid-template-columns: minmax(0, 1fr); }
   .account-copy { border-inline-end: 1px solid var(--color-line); border-radius: 16px 16px 0 0; }

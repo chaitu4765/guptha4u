@@ -24,7 +24,7 @@
 .studio-stage { position: relative; isolation: isolate; min-height: 380px; aspect-ratio: 3 / 1; overflow: clip; background: #f5eadb; scroll-margin-top: 88px; }
 .studio-scene { position: absolute; inset: 0; z-index: -2; background: url("/storefront/art/studio-v2.webp") center / 100% 100% no-repeat; transform-origin: 0 0; transition: transform 830ms cubic-bezier(.22, .85, .22, 1); }
 .studio-wash { position: absolute; inset: 0; z-index: -1; opacity: 0; background: linear-gradient(90deg, #f5eadb 29%, #f5eadb var(--wash-mid, 41%), #f5eadb00 67%); transition: opacity 560ms ease; }
-.studio-copy { position: relative; z-index: 2; padding: clamp(28px, 3.2vw, 60px) 24px 0; text-align: center; pointer-events: none; }
+.studio-copy { position: relative; z-index: 2; padding: clamp(28px, 3.2vw, 60px) 24px 0; text-align: center; pointer-events: none; transition: opacity 220ms ease; }
 .studio-copy h1 { font-size: clamp(38px, 4vw, 70px); line-height: 1.06; }
 .studio-copy p { margin-top: 4px; color: #8a511d; font-family: Caveat, Georgia, serif; font-size: clamp(32px, 4vw, 64px); line-height: 1.03; }
 .studio-render { display: none; }
@@ -37,8 +37,8 @@
 .studio-object::after {
   content: ""; position: absolute; left: 50%; top: var(--plinth-floor, 83.6%);
   width: var(--plinth-width, 96%); height: 7%; min-height: 11px; translate: -50% -50%;
-  border: 2px solid #fff4ac; border-radius: 50%; background: #ffc33425;
-  box-shadow: 0 0 6px 1px #fff6bb, 0 0 16px 5px #ffd64a, 0 0 29px 7px #ff9e239c, inset 0 0 8px #ffcd38;
+  border: 2px solid #fffbd0; border-radius: 50%;
+  box-shadow: 0 0 5px 1px #fff1a8, 0 0 12px 3px #ffd338, 0 0 19px 4px #ffad2780, inset 0 0 5px #ffd338;
   pointer-events: none; opacity: 0; scale: .95; transition: opacity .42s var(--ease), scale .5s var(--ease);
 }
 .studio-object:is(:hover, :focus-visible)::after { opacity: 1; scale: 1; }
@@ -55,7 +55,8 @@
 [data-key="papers"], #studio[data-category="papers"] { --shelf-x: 67.2%; --focus-x: 67.2%; }
 [data-key="accessories"], #studio[data-category="accessories"] { --shelf-x: 79.4%; --focus-x: 79.4%; }
 [data-key="brands"], #studio[data-category="brands"] { --shelf-x: 92.2%; --focus-x: 92.2%; --destination: 85%; }
-#studio:not([data-category=""]) .studio-scene { transform: translate(calc(var(--destination, 73%) - var(--focus-x) * 2.05), -81.35%) scale(2.05); }
+#studio:is(.zooming-category, :not([data-category=""])) .studio-scene { transform: translate(calc(var(--destination, 73%) - var(--focus-x) * 2.05), -81.35%) scale(2.05); }
+.zooming-category :is(.studio-copy, .studio-objects, .studio-hint) { opacity: 0; }
 #studio:not([data-category=""]) .studio-wash { opacity: 1; }
 #studio:not([data-category=""]) .studio-copy { text-align: left; padding: clamp(102px, 10vw, 180px) var(--gutter) 24px; max-width: 52%; }
 #studio:not([data-category=""]) .studio-copy h1 { font-size: clamp(36px, 4vw, 58px); }
@@ -74,7 +75,6 @@
 .product-meta .available, .product-meta .unavailable { flex-basis: 100%; }
 .reference-price, .image-credit { font-size: 12px; color: var(--color-secondary); margin-top: 12px; overflow-wrap: anywhere; }
 .detail-discount { color: var(--color-success); font-weight: 700; }
-.loading-category .studio-content { opacity: .55; }
 .studio-content .page { scroll-margin-top: 154px; }
 
 @media (max-width: 1380px) {
@@ -127,6 +127,6 @@
   .studio-back { left: 20px; top: 20px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .studio-scene, .studio-wash, .studio-objects, .studio-object::after { transition: none; }
+  .studio-scene, .studio-wash, .studio-copy, .studio-objects, .studio-object::after { transition: none; }
 }
 

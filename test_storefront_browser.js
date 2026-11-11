@@ -36,7 +36,23 @@ async page => {
   await page.locator('.studio-object[data-key=canvas]').hover();
   await page.waitForFunction(() => new DOMMatrix(getComputedStyle(document.querySelector('[data-lift=brushes]')).transform).a === 1);
   await brushes.hover();
-  await brushes.click();
+  await page.evaluate(() => {
+    const fetch = window.fetch;
+    window.fetch = async (url, options) => {
+      if (new URL(url, location.href).pathname === '/shop/category/brushes') {
+        window.fetch = fetch;
+        await new Promise(resolve => { window.finishCategory = resolve; });
+      }
+      return fetch(url, options);
+    };
+  });
+  try {
+    await brushes.click();
+    await page.waitForFunction(() => new DOMMatrix(getComputedStyle(document.querySelector('.studio-scene')).transform).a > 1.6);
+    expect(!await page.locator('[data-studio-loading]').isVisible(), 'The page loader covered the hero zoom');
+  } finally {
+    await page.evaluate(() => window.finishCategory?.());
+  }
   await page.waitForURL('**/category/brushes');
   await page.waitForFunction(() => new DOMMatrix(getComputedStyle(document.querySelector('.studio-scene')).transform).a > 2);
   expect(await scene.evaluate(element => window.initialScene === element), 'Scene was replaced during zoom');
@@ -46,8 +62,10 @@ async page => {
   expect(await scene.evaluate(element => window.initialScene === element), 'Scene was replaced on return');
   await page.goBack();
   await page.waitForURL('**/category/brushes');
+  await page.locator('#studio[data-category="brushes"]').waitFor();
   await page.goForward();
   await page.waitForURL('**/shop');
+  await page.locator('#studio[data-category=""]').waitFor();
 
   const navigation = page.getByRole('navigation', {name:'Shop categories'});
   const paints = navigation.getByRole('button', {name:'Paints & Mediums', exact:true});

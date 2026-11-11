@@ -94,8 +94,7 @@ document.addEventListener("focusin", event => hover(event, true))
 document.addEventListener("focusout", event => hover(event, false))
 document.addEventListener("storefront:top", scrollToTop)
 document.addEventListener("storefront:navigated", () => {
-  gsap.killTweensOf(".studio-lift")
-  gsap.set(".studio-lift", { clearProps: "transform" })
+  if (motion.matches) gsap.to(".studio-lift", { scale: 1, duration: .56, ease: "power3.out", overwrite: "auto" })
 })
 document.addEventListener("storefront:commerce", event => {
   if (event.target instanceof Element) enter(event.target)

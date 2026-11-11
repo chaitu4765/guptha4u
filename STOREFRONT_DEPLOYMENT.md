@@ -71,6 +71,10 @@ The bundle contains the storefront, published announcement fields, catalogue pro
 
 Enable Vercel Authentication with Standard Protection. For a new project, deploy a placeholder without catalogue data first. Vercel can assign the first deployment to Production and give it a public alias. Then run `vercel deploy --environment preview` from the generated folder. Confirm the deployment is in Preview and requires authentication before sharing its URL. The staged supplier photos are for the protected client demo.
 
+### Checkout-enabled preview
+
+Pass `--checkout-demo` to the bundle builder and connect the dedicated demo Postgres database to the Vercel preview environment as `GUPTHA_DATABASE_URL`. The bundle gives each supplier-available variant one opening demo unit. Paid simulations persist order history and change only the demo stock in Postgres. Redeploy with the same database to retain accounts, orders and stock changes. Share the resulting preview using Vercel’s deployment-scoped share link.
+
 ## Production demo
 
 Run one instance of the public WSGI app on a host with persistent local disk. Run the ERP separately on loopback for private administration over SSH or a private network. Point both processes at the same persistent database and media folder. With demo checkout disabled, the public WSGI process opens the inventory database read-only. The public proxy connects to Waitress on port 8080. Keep the ERP's port 8090 private.

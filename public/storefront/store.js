@@ -555,6 +555,7 @@ search.addEventListener('keydown', event => {
   if (!suggestions.length) return;
   if (event.key === 'Enter' && active >= 0) {
     event.preventDefault();
+    setPageLoading(true);
     location.assign(suggestions[active].url);
     return;
   }
@@ -596,12 +597,13 @@ function setPageLoading(active) {
   if (active) showLoading = setTimeout(() => { stageLoader.hidden = false; }, 120);
   else stageLoader.hidden = true;
 }
-document.addEventListener('storefront:loading', event => setPageLoading(event.detail));
 window.addEventListener('pageshow', () => setPageLoading(false));
 document.addEventListener('click', event => {
   const link = event.target.closest('a[href^="/shop"]');
   if (!link || link.pathname === location.pathname || link.target || event.button ||
       event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+  if (!/^\/shop\/(?:product\/[^/]+|wishlist|cart)$/.test(link.pathname) &&
+      !(link.pathname === '/shop' && location.pathname !== '/shop/' && link.matches('.wordmark'))) return;
   queueMicrotask(() => { if (!event.defaultPrevented) setPageLoading(true); });
 });
 document.addEventListener('keydown', event => {

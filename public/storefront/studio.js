@@ -6,12 +6,16 @@
   const motion = matchMedia('(prefers-reduced-motion: no-preference)');
   let pending;
 
-  async function navigate(url, push = true) {
+  async function navigate(url, push = true, object) {
     pending?.abort();
     const controller = new AbortController();
     pending = controller;
-    studio.classList.add('loading-category');
-    document.dispatchEvent(new CustomEvent('storefront:loading', { detail: true }));
+    studio.classList.toggle('zooming-category', Boolean(object));
+    if (object) {
+      const style = getComputedStyle(object);
+      stage.style.setProperty('--focus-x', style.getPropertyValue('--focus-x'));
+      stage.style.setProperty('--destination', style.getPropertyValue('--destination') || '73%');
+    }
     try {
       const response = await fetch(url, { signal: controller.signal });
       if (!response.ok) throw new Error('Category unavailable');
@@ -27,6 +31,7 @@
       const changedCategory = key !== studio.dataset.category;
       const render = next.querySelector('.studio-render');
       studio.dataset.category = key;
+      finishZoom();
       stage.querySelector('.studio-copy').replaceWith(next.querySelector('.studio-copy'));
       stage.querySelector('.studio-render').replaceWith(render);
       stage.querySelector('.studio-back').hidden = !key;
@@ -65,18 +70,21 @@
     } catch (error) {
       if (error.name !== 'AbortError') location.assign(url);
     } finally {
-      if (pending === controller) {
-        studio.classList.remove('loading-category');
-        document.dispatchEvent(new CustomEvent('storefront:loading', { detail: false }));
-      }
+      if (pending === controller) finishZoom();
     }
+  }
+
+  function finishZoom() {
+    studio.classList.remove('zooming-category');
+    stage.style.removeProperty('--focus-x');
+    stage.style.removeProperty('--destination');
   }
 
   document.addEventListener('click', event => {
     const link = event.target.closest('a[data-studio-link], #studio .pagination a');
     if (!link || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
-    navigate(link.href);
+    navigate(link.href, true, link.matches('.studio-object') && !compact.matches && motion.matches ? link : null);
   });
   document.addEventListener('submit', event => {
     if (!event.target.matches('.studio-content .filters')) return;

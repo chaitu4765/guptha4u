@@ -13,8 +13,9 @@ import sqlite3
 import unicodedata
 from urllib.parse import parse_qs, urlencode, urlsplit
 from storefront_search import search_ids
-from storefront_checkout import (BODY_LIMIT, CHECKOUT_API, POST_PATHS, demo_path, submit_demo,
+from storefront_checkout import (BODY_LIMIT, CHECKOUT_API, POST_PATHS, demo_enabled, submit_demo,
                                  DELIVERY_FEE, MEMBER_PERCENT, MEMBER_PRICE, QUALIFYING_SPEND, customer_orders)
+from storefront_hosted import HOSTED_DEMO, DATABASE_ERRORS, apply_hosted_stock
 import storefront_accounts as accounts
 
 ROOT = Path(__file__).resolve().parent
@@ -262,7 +263,7 @@ def layout(title, description, path, content, origin, notice='', noindex=False, 
     markup = ''
     if structured:
         markup = '<script type="application/ld+json">' + json.dumps(structured).replace('<', r'\u003c') + '</script>'
-    robots = '<meta name="robots" content="noindex,follow">' if noindex or CATALOGUE_PREVIEW else ''
+    robots = '<meta name="robots" content="noindex,follow">' if noindex or CATALOGUE_PREVIEW or HOSTED_DEMO else ''
     navigation = nav_links(products, True)
     member_link = '<a href="/shop/privilege">Privilege membership</a>' if demo else ''
     return f'''<!doctype html>
@@ -705,7 +706,7 @@ def demo_page(view):
 
 
 def storefront_demo_post(path, size, source, content_type, origin, read, connect, raw_cookies=''):
-    if demo_path() is None:
+    if not demo_enabled():
         return json_response({'error': 'Demo checkout is unavailable.'}, 404)
     if source != origin:
         return json_response({'error': 'Open the demo from the storefront address.'}, 403)
@@ -720,12 +721,14 @@ def storefront_demo_post(path, size, source, content_type, origin, read, connect
 
     def load_products(ids, transaction=None):
         marks = ','.join('?' for _ in ids)
-        if transaction is not None:
+        if transaction is not None and not HOSTED_DEMO:
             rows = transaction.execute(f'SELECT {PRODUCT_FIELDS}, tax FROM inventory.products WHERE archived=0 AND id IN ({marks})', tuple(ids))
             return {str(row['id']): public_product(catalogue_product(row)) for row in rows}
         with closing(connect()) as c:
             rows = c.execute(f'SELECT {PRODUCT_FIELDS}, tax FROM products WHERE archived=0 AND id IN ({marks})', tuple(ids))
-            return {str(row['id']): public_product(catalogue_product(row)) for row in rows}
+            products = [public_product(catalogue_product(row)) for row in rows]
+        apply_hosted_stock(products, transaction, only_ids=True)
+        return {product['id']: product for product in products}
 
     try:
         account = accounts.current_account(raw_cookies)
@@ -734,7 +737,7 @@ def storefront_demo_post(path, size, source, content_type, origin, read, connect
         return json_response(submit_demo(path, read(size), load_products, account['id'] if account else None))
     except ValueError as error:
         return json_response({'error': str(error)}, 400)
-    except sqlite3.DatabaseError:
+    except DATABASE_ERRORS:
         return json_response({'error': 'Demo checkout is temporarily unavailable. Please try again.'}, 503)
 
 
@@ -752,6 +755,19 @@ def account_return(value):
             and '\\' not in value and re.fullmatch(r'/shop(?:/?|/(?:cart|checkout|catalogue|wishlist|privilege|category/[a-z-]+|product/[a-z0-9-]+))(?:\?[^#]*)?', value)):
         return value
     return '/shop/account'
+
+
+def order_history_item(order):
+    receipt = order['receipt']
+    day = datetime.fromisoformat(order['created']).astimezone(timezone(timedelta(hours=5, minutes=30)))
+    lines = order['quote'].get('lines', [{'name': 'Gupta Privilege card', 'type': '', 'quantity': 1}])
+    items = ''.join(f'<li>{escape(line["name"])}'
+                    + (f' <small>{escape(line["type"])}</small>' if line['type'] else '')
+                    + f'<span>Qty {line["quantity"]}</span></li>' for line in lines)
+    status = 'Demo paid' if receipt['paid'] else 'Payment due'
+    return (f'<li><div class="order-heading"><strong>{escape(receipt["reference"])}</strong>'
+            f'<time datetime="{day.date()}">{day:%d %b %Y}</time></div>'
+            f'<ul class="order-items">{items}</ul><p>{status} · <strong>{price(receipt["total"])}</strong></p></li>')
 
 
 def storefront_account_response(path, method, query, origin, raw_cookies, source, content_type, size, read, connect):
@@ -814,23 +830,21 @@ def storefront_account_response(path, method, query, origin, raw_cookies, source
         return response(303, '', headers=[*private, ('Location', '/shop/sign-in')])
     if path != '/shop/account' and account:
         return response(303, '', headers=[*private, ('Location', next_page)])
-    demo = demo_path() is not None
+    demo = demo_enabled()
     with closing(connect()) as c:
         products = navigation_products(c)
     if account:
         title = 'Your account'
         identity = escape(account['name'] or account['email'] or account['provider'].capitalize() + ' member')
         orders = customer_orders(account['id'])
-        history = ''.join(f'<li><strong>{escape(order["receipt"]["reference"])}</strong>'
-                          f'<span>{escape(order["kind"])} · {price(order["receipt"]["total"])}'
-                          f' · {"Demo paid" if order["receipt"]["paid"] else "Payment due"}</span></li>' for order in orders)
+        history = ''.join(map(order_history_item, orders))
         privilege = '<a class="button outline" href="/shop/privilege">Gupta Privilege</a>' if demo else ''
         content = f'''<section class="wrap page account-dashboard">{trail(title)}
 <h1>{title}</h1><p>{identity}</p>
 <div class="account-actions"><a class="button outline" href="/shop/wishlist">Wishlist</a>
 <a class="button outline" href="/shop/cart">View cart</a>{privilege}
 <form action="/shop/auth/sign-out" method="post"><button class="button outline">Sign out</button></form></div>
-<h2>Order history</h2>{'<ul class="account-orders">' + history + '</ul>' if history else '<p>Orders placed while signed in will appear here.</p>'}
+<h2>Purchase history</h2>{'<ul class="account-orders">' + history + '</ul>' if history else '<p>Orders placed while signed in will appear here.</p>'}
 </section>'''
     else:
         signup = path.endswith('/sign-up')
@@ -839,7 +853,7 @@ def storefront_account_response(path, method, query, origin, raw_cookies, source
                 'Pick up where you left off and see your Gupta orders.')
         redirect_query = '?' + urlencode({'next': next_page}) if next_page != '/shop/account' else ''
         actions = ''
-        for provider in accounts.PROVIDERS:
+        for provider in (() if HOSTED_DEMO else accounts.PROVIDERS):
             label = (f'<img src="/storefront/{provider}-sign-in.png" alt="" width="22" height="22">'
                      f'<span>Continue with {provider.title()}</span>')
             button = f'account-provider account-provider-{provider}'
@@ -851,7 +865,7 @@ def storefront_account_response(path, method, query, origin, raw_cookies, source
         status = params.get('status', [''])[0]
         if not error and status in {'retry', 'unavailable'}:
             error = 'Sign-in could not be completed. Please try again.'
-        note = f'<p class="account-note">{" and ".join(missing)} sign-in requires store setup.</p>' if missing else ''
+        note = f'<p class="account-note">{" and ".join(missing)} sign-in requires store setup.</p>' if missing and not HOSTED_DEMO else ''
         alert = f'<p class="account-error" role="alert">{escape(error)}</p>' if error else ''
         switch = (f'Already have an account? <a href="/shop/sign-in{escape(redirect_query)}">Sign in</a>' if signup else
                   f'New to Gupta? <a href="/shop/sign-up{escape(redirect_query)}">Create an account</a>')
@@ -863,11 +877,11 @@ def storefront_account_response(path, method, query, origin, raw_cookies, source
 <label>Password<input name="password" type="password" autocomplete="{'new-password' if signup else 'current-password'}" minlength="10" maxlength="160" required></label>
 <button class="button" type="submit">{'Create demo account' if signup else 'Sign in with email'}</button>
 {'<p class="account-note">Use sample details and a unique demo password.</p>' if signup else ''}</form>
-<p class="account-divider">Or continue with</p>'''
+{'<p class="account-divider">Or continue with</p>' if actions else ''}'''
         content = f'''<section class="wrap account-shell" aria-labelledby="account-heading">
 <div class="account-copy"><a class="account-browse" href="/shop/catalogue">{icon('arrow')} Browse materials</a>
 <h1 id="account-heading">{title}</h1><p class="account-intro">{desc}</p>{alert}{email_form}
-<div class="account-providers">{actions}</div>{note}<p class="account-switch">{switch}</p></div>
+{f'<div class="account-providers">{actions}</div>' if actions else ''}{note}<p class="account-switch">{switch}</p></div>
 <figure class="account-art"><img src="/storefront/art/studio-v2.webp" alt="Brushes and canvases on the sunlit Gupta workbench" width="2172" height="724">
 <figcaption>Gupta Art Store <span>Since 1916</span></figcaption></figure>
 </section>'''
@@ -903,7 +917,7 @@ def storefront_response(path, query, connect, origin, raw_cookies=''):
         return None
     if len(query) > 6500:
         return json_response({'error':'Query is too long.'}, 400)
-    if path == '/shop/checkout' and demo_path() and not accounts.current_account(raw_cookies):
+    if path == '/shop/checkout' and demo_enabled() and not accounts.current_account(raw_cookies):
         return response(303, '', headers=[('Cache-Control', 'no-store'),
                         ('Location', '/shop/sign-up?' + urlencode({'next': path}))])
     params = parse_qs(query)
@@ -917,7 +931,9 @@ def storefront_response(path, query, connect, origin, raw_cookies=''):
         placeholders = ','.join('?' for _ in ids)
         with closing(connect()) as c:
             rows = c.execute(f'SELECT {PRODUCT_FIELDS} FROM products WHERE archived=0 AND id IN ({placeholders})', ids)
-            return json_response({'products':[public_product(catalogue_product(row)) for row in rows]})
+            products = [public_product(catalogue_product(row)) for row in rows]
+        apply_hosted_stock(products, only_ids=True)
+        return json_response({'products': products})
     with closing(connect()) as c:
         query_text = params.get('q', [''])[0].strip()[:100]
         if path == '/api/storefront/search':
@@ -930,6 +946,8 @@ def storefront_response(path, query, connect, origin, raw_cookies=''):
             matches = [found[pid] for pid in ids if pid in found]
             if params.get('brief') == ['1']:
                 matches = [{key: product[key] for key in ('id', 'name', 'url', 'image')} for product in matches]
+            else:
+                apply_hosted_stock(matches, only_ids=True)
             return json_response({'products':matches})
         ranked = {pid: index for index, pid in enumerate(search_ids(c, query_text))} if query_text else None
         nav_products = None
@@ -950,7 +968,9 @@ def storefront_response(path, query, connect, origin, raw_cookies=''):
                         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + xml + '</urlset>',
                         'application/xml; charset=utf-8', [('Cache-Control','no-cache')])
 
-    demo = demo_path() is not None
+    if path.rstrip('/') == SHOP or path.startswith((SHOP + '/catalogue', SHOP + '/category/', SHOP + '/product/')):
+        apply_hosted_stock(products)
+    demo = demo_enabled()
     title, desc, status, noindex, schema = '', 'Browse art supplies and stationery from Gupta’s demo catalogue.', 200, False, None
     canonical = path
     if path in {SHOP, SHOP + '/'}:
@@ -996,7 +1016,7 @@ def storefront_response(path, query, connect, origin, raw_cookies=''):
         content = f'''<section class="wrap page prose">{trail(title)}<h1>{title}</h1>
 <p>This policy describes how this Gupta storefront demo handles the information you share.</p>
 <h2>Browsing and shopping</h2><p>Your cart and wishlist are saved in this browser. You can clear them through your browser’s site settings. Search terms and availability checks go to the storefront server.</p>
-<h2>Account and demo checkout</h2><p>If you sign in through Google or Apple, the storefront uses the provider’s account identifier and the email address it shares to create your account. Local demo accounts store the name and email you enter and a salted password hash. A session cookie keeps you signed in. Demo orders store the sample contact and fulfillment details you submit.</p>
+<h2>Account and demo checkout</h2><p>{'If you sign in through Google or Apple, the storefront uses the provider’s account identifier and the email address it shares to create your account. ' if not HOSTED_DEMO else ''}Demo accounts store the name and email you enter and a salted password hash. A session cookie keeps you signed in. Demo orders store the sample contact and fulfillment details you submit.</p>
 <h2>WhatsApp messages</h2><p>When you open a WhatsApp draft, the request or order details in the draft go to WhatsApp. You can review and edit the draft before sending it to the store.</p></section>'''
     elif path == SHOP + '/refunds':
         title = 'Refund policy'
@@ -1049,7 +1069,7 @@ def application(environ, start_response):
             result = storefront_account_response(
                 path, method, environ.get('QUERY_STRING', ''), origin, raw_cookies, environ.get('HTTP_ORIGIN'),
                 environ.get('CONTENT_TYPE', ''), environ.get('CONTENT_LENGTH'), environ['wsgi.input'].read, read_catalogue)
-        except sqlite3.DatabaseError:
+        except DATABASE_ERRORS:
             result = response(503, 'Account temporarily unavailable.', 'text/plain', [('Cache-Control', 'no-store')])
         if result is None:
             result = response(404, 'Not found', 'text/plain')
@@ -1063,7 +1083,7 @@ def application(environ, start_response):
     else:
         try:
             result = storefront_response(path, environ.get('QUERY_STRING', ''), read_catalogue, origin, raw_cookies)
-        except sqlite3.DatabaseError:
+        except DATABASE_ERRORS:
             result = response(503, 'Catalogue temporarily unavailable. Please try again.', 'text/plain')
         if result is None:
             result = response(404, 'Not found', 'text/plain')

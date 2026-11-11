@@ -218,6 +218,9 @@ def run(port, server, storefront, root, run_browser):
     order = {**earn, 'action':'order', 'review':review['review'], 'request_key':str(uuid.uuid4())}
     receipt = pay(order)
     assert receipt['card'] and receipt['total'] == 500000 and receipt['paid']
+    history = request('/shop/account', opener=shopper)
+    assert all(part in history for part in ('Purchase history', receipt['reference'], 'QA Studio Palette', 'Qty 2', 'Demo paid'))
+    assert receipt['reference'] not in request('/shop/account')
     message = parse_qs(urlsplit(receipt['whatsapp']).query)['text'][0]
     assert all(part in message for part in (receipt['reference'], 'Demo Customer', 'QA Studio Palette', 'Palettes', 'Quantity: 2'))
     assert pay(order) == receipt

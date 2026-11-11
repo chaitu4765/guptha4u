@@ -10,6 +10,7 @@ import re
 import secrets
 import sqlite3
 from urllib.parse import urlencode
+from storefront_hosted import HOSTED_DEMO, STOCK_SCHEMA, connect_hosted
 
 
 CHECKOUT_API = '/api/storefront/demo/checkout'
@@ -33,19 +34,15 @@ def demo_path():
     return Path(setting).resolve() if setting else None
 
 
+def demo_enabled():
+    return HOSTED_DEMO or demo_path() is not None
+
+
 def catalogue_path():
     return Path(os.environ.get('GUPTHA_DB', Path(__file__).parent / 'data/retail.sqlite3')).resolve()
 
 
-def connect_demo():
-    path = demo_path()
-    catalogue = catalogue_path()
-    if path is None or path == catalogue or (path.exists() and catalogue.exists() and path.samefile(catalogue)):
-        raise sqlite3.OperationalError('A separate demo checkout database is required.')
-    conn = sqlite3.connect(path, timeout=5, uri=True)
-    conn.row_factory = sqlite3.Row
-    try:
-        conn.executescript("""
+CHECKOUT_SCHEMA = """
             CREATE TABLE IF NOT EXISTS demo_applications(
                 contact TEXT PRIMARY KEY, created TEXT NOT NULL
             );
@@ -60,7 +57,20 @@ def connect_demo():
                 account_id TEXT NOT NULL, reference TEXT NOT NULL UNIQUE,
                 PRIMARY KEY(account_id, reference)
             );
-        """)
+"""
+
+
+def connect_demo():
+    if HOSTED_DEMO:
+        return connect_hosted(CHECKOUT_SCHEMA + STOCK_SCHEMA)
+    path = demo_path()
+    catalogue = catalogue_path()
+    if path is None or path == catalogue or (path.exists() and catalogue.exists() and path.samefile(catalogue)):
+        raise sqlite3.OperationalError('A separate demo checkout database is required.')
+    conn = sqlite3.connect(path, timeout=5, uri=True)
+    conn.row_factory = sqlite3.Row
+    try:
+        conn.executescript(CHECKOUT_SCHEMA)
     except sqlite3.DatabaseError:
         conn.close()
         raise
@@ -141,7 +151,7 @@ def checkout_quote(conn, data, load_products):
     quote = {'lines': lines, 'subtotal': subtotal, 'savings': savings, 'delivery': delivery,
              'tax': tax, 'total': total, 'fulfillment': fulfillment, 'payment': payment,
              'earns_card': membership is None and payment in ('upi', 'card') and subtotal - savings > QUALIFYING_SPEND}
-    return quote, {'contact': contact, 'name': name, 'address': address}
+    return quote, {'contact': contact, 'name': name, 'address': address}, products
 
 
 def digest(data):
@@ -150,7 +160,7 @@ def digest(data):
 
 def issue_card(conn, contact, created):
     number = 'GA-DEMO-' + secrets.token_hex(8).upper()
-    inserted = conn.execute('INSERT OR IGNORE INTO demo_cards VALUES(?,?,?)', (contact, number, created))
+    inserted = conn.execute('INSERT INTO demo_cards VALUES(?,?,?) ON CONFLICT(contact) DO NOTHING', (contact, number, created))
     return number if inserted.rowcount else None
 
 
@@ -166,11 +176,11 @@ def submit_demo(path, raw, load_products, account_id=None):
     with closing(connect_demo()) as conn, conn:
         if path == PRIVILEGE_API and action == 'apply':
             contact = contact_value(data)
-            conn.execute('INSERT OR IGNORE INTO demo_applications VALUES(?,?)', (contact, created))
+            conn.execute('INSERT INTO demo_applications VALUES(?,?) ON CONFLICT(contact) DO NOTHING', (contact, created))
             return {'applied': True, 'whatsapp': whatsapp_draft(
                 f'Hello Gupta Art Store, I would like to request a Gupta Privilege card.\nMy email or mobile number: {contact}')}
         if path == CHECKOUT_API and action == 'review':
-            quote, _ = checkout_quote(conn, data, load_products)
+            quote, _, _ = checkout_quote(conn, data, (lambda ids: load_products(ids, conn)) if HOSTED_DEMO else load_products)
             return {'quote': quote, 'review': digest(quote)}
         if (path, action) not in ((CHECKOUT_API, 'order'), (PRIVILEGE_API, 'buy')):
             raise ValueError('Choose a valid checkout action.')
@@ -178,13 +188,17 @@ def submit_demo(path, raw, load_products, account_id=None):
         if not re.fullmatch(r'[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}', request_key):
             raise ValueError('Refresh the page to start a new checkout.')
         fingerprint = digest({'account': account_id, 'order': data}) if account_id else digest(data)
-        if path == CHECKOUT_API:
+        if path == CHECKOUT_API and not HOSTED_DEMO:
             conn.execute('ATTACH DATABASE ? AS inventory', (catalogue_path().as_uri() + '?mode=rw',))
             # SQLite commits changes to both files atomically with rollback journals.
             if any(conn.execute(f'PRAGMA {db}.journal_mode').fetchone()[0] not in ('delete', 'truncate', 'persist')
                    for db in ('main', 'inventory')):
                 raise sqlite3.OperationalError('Demo checkout requires rollback journals.')
-        conn.execute('BEGIN IMMEDIATE')
+        if HOSTED_DEMO:
+            # Serialize the demo's review revalidation, inventory update and receipt creation.
+            conn.execute('SELECT pg_advisory_xact_lock(1206081)')
+        else:
+            conn.execute('BEGIN IMMEDIATE')
         existing = conn.execute('SELECT fingerprint,data FROM demo_orders WHERE request_key=?',
                                 (request_key,)).fetchone()
         if existing:
@@ -192,7 +206,7 @@ def submit_demo(path, raw, load_products, account_id=None):
                 raise ValueError('Start a new review before placing a different order.')
             return json.loads(existing['data'])['receipt']
         if path == CHECKOUT_API:
-            quote, customer = checkout_quote(conn, data, lambda ids: load_products(ids, conn))
+            quote, customer, products = checkout_quote(conn, data, lambda ids: load_products(ids, conn))
             if data.get('review') != digest(quote):
                 raise ValueError('Your order changed. Review the updated total before placing it.')
             contact = customer['contact']
@@ -212,12 +226,18 @@ def submit_demo(path, raw, load_products, account_id=None):
         if paid and path == CHECKOUT_API:
             for line in quote['lines']:
                 quantity, product_id = line['quantity'], line['id']
-                updated = conn.execute('''UPDATE inventory.products SET stock=stock-?
-                    WHERE id=? AND archived=0 AND stock>=?''', (quantity, product_id, quantity))
+                if HOSTED_DEMO:
+                    updated = conn.execute('''INSERT INTO demo_stock VALUES(?,?) ON CONFLICT(product_id)
+                        DO UPDATE SET stock=demo_stock.stock-? WHERE demo_stock.stock>=?''',
+                        (int(product_id), products[product_id]['stock'] - quantity, quantity, quantity))
+                else:
+                    updated = conn.execute('''UPDATE inventory.products SET stock=stock-?
+                        WHERE id=? AND archived=0 AND stock>=?''', (quantity, product_id, quantity))
                 if updated.rowcount != 1:
                     raise ValueError('A material or quantity is no longer available. Review your cart.')
-                conn.execute('INSERT INTO inventory.movements(created,product_id,delta,reason) VALUES(?,?,?,?)',
-                             (created, product_id, -quantity, f'Demo storefront payment {reference}'))
+                if not HOSTED_DEMO:
+                    conn.execute('INSERT INTO inventory.movements(created,product_id,delta,reason) VALUES(?,?,?,?)',
+                                 (created, product_id, -quantity, f'Demo storefront payment {reference}'))
         receipt = {'reference': reference, 'paid': paid, 'total': quote['total'],
                    'payment': PAYMENTS[quote['payment']], 'card': card}
         if paid:
@@ -250,7 +270,7 @@ def admin_demo_activity():
 
 
 def customer_orders(account_id):
-    if demo_path() is None:
+    if not demo_enabled():
         return []
     with closing(connect_demo()) as conn:
         rows = conn.execute('''SELECT o.data,o.created FROM demo_orders o
