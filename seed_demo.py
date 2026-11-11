@@ -27,8 +27,6 @@ def seed():
             sku = f'DEMO-ART-{i:03d}'
             existing = c.execute('SELECT id FROM products WHERE sku=?', (sku,)).fetchone()
             if existing:
-                c.execute('UPDATE products SET name=?, category=?, price=?, cost=?, reorder=?, image=?, description=? WHERE id=?',
-                          (name, category, price*100, cost*100, reorder, image, desc, existing['id']))
                 continue
             pid = c.execute('INSERT INTO products(name,sku,category,price,cost,tax,reorder,published,description,image) VALUES(?,?,?,?,?,0,?,1,?,?)',
                             (name, sku, category, price*100, cost*100, reorder, desc, image)).lastrowid

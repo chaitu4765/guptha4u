@@ -1,10 +1,14 @@
 """Guptha Arts: local single-business retail ERP. Python standard library only."""
-import os, json, sqlite3, secrets, hashlib, hmac, time, csv, io, re
+import os, json, sqlite3, secrets, hashlib, hmac, time, csv, io, re, sys
 from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse
 from datetime import datetime, timezone, date
+from storefront import (storefront_response, storefront_demo_post, storefront_account_response,
+                        ACCOUNT_PAGES, announcement_values, response as shop_response)
+from storefront_checkout import POST_PATHS, admin_demo_activity
+from storefront_search import init_search
 
 ROOT = Path(__file__).resolve().parent
 DB = Path(os.environ.get('GUPTHA_DB', str(ROOT / 'data' / 'retail.sqlite3')))
@@ -40,6 +44,27 @@ def init():
             c.execute("ALTER TABLE holds ADD COLUMN metadata TEXT DEFAULT '{}'")
         if 'image' not in {r['name'] for r in c.execute('PRAGMA table_info(products)')}:
             c.execute("ALTER TABLE products ADD COLUMN image TEXT DEFAULT ''")
+        product_columns = {row['name'] for row in c.execute('PRAGMA table_info(products)')}
+        for column, definition in [
+            ('brand', "TEXT NOT NULL DEFAULT ''"), ('subcategory', "TEXT NOT NULL DEFAULT ''"),
+            ('variant', "TEXT NOT NULL DEFAULT ''"), ('mrp', 'INTEGER NOT NULL DEFAULT 0'),
+            ('featured_discount', 'INTEGER NOT NULL DEFAULT 0'),
+            ('reference_url', "TEXT NOT NULL DEFAULT ''"), ('reference_date', "TEXT NOT NULL DEFAULT ''"),
+            ('image_source', "TEXT NOT NULL DEFAULT ''"), ('image_license', "TEXT NOT NULL DEFAULT ''"),
+            ('image_verified', 'INTEGER NOT NULL DEFAULT 0'),
+            ('source_id', 'INTEGER'),
+            ('source_sku', "TEXT NOT NULL DEFAULT ''"),
+            ('source_available', 'INTEGER'),
+            ('catalogue_groups', "TEXT NOT NULL DEFAULT '[]'"),
+        ]:
+            if column not in product_columns:
+                c.execute(f'ALTER TABLE products ADD COLUMN {column} {definition}')
+        c.execute('CREATE UNIQUE INDEX IF NOT EXISTS products_source_id ON products(source_id) WHERE source_id IS NOT NULL')
+        init_search(c)
+        settings_columns = {row['name'] for row in c.execute('PRAGMA table_info(settings)')}
+        for column in ('announcement', 'announcement_link', 'announcement_start', 'announcement_end', 'announcement_active'):
+            if column not in settings_columns:
+                c.execute(f"ALTER TABLE settings ADD COLUMN {column} TEXT NOT NULL DEFAULT ''")
         c.execute("INSERT INTO payments(order_id,created,method,amount,reference) SELECT id,created,CASE WHEN payment IN ('Cash','UPI','Card') THEN payment ELSE 'Legacy' END,paid,'Imported existing payment total' FROM orders WHERE paid>0 AND NOT EXISTS(SELECT 1 FROM payments WHERE payments.order_id=orders.id)")
 def now(): return datetime.now(timezone.utc).isoformat()
 def money(v):
@@ -102,13 +127,44 @@ class Handler(BaseHTTPRequestHandler):
         cookie=dict(x.strip().split('=',1) for x in self.headers.get('Cookie','').split(';') if '=' in x)
         s=SESSIONS.get(cookie.get('guptha',''))
         return bool(s and s>time.time())
+    def send_storefront(self, result):
+        status, headers, body = result
+        self.send_response(status)
+        for key, value in headers:
+            self.send_header(key, value)
+        self.end_headers()
+        self.wfile.write(body)
+    def storefront_origin(self):
+        port = self.server.server_port
+        host = 'localhost' if self.headers.get('Host') == f'localhost:{port}' else '127.0.0.1'
+        return f'http://{host}:{port}'
+    def send_account(self, url):
+        try:
+            result = storefront_account_response(
+                url.path, self.command, url.query, self.storefront_origin(), self.headers.get('Cookie',''),
+                self.headers.get('Origin'), self.headers.get('Content-Type',''),
+                self.headers.get('Content-Length'), self.rfile.read, connect)
+        except sqlite3.DatabaseError:
+            result = shop_response(503, 'Account temporarily unavailable.', 'text/plain', [('Cache-Control', 'no-store')])
+        return self.send_storefront(result or shop_response(404, 'Not found', 'text/plain'))
     def do_GET(self):
-        path=urlparse(self.path).path
+        url=urlparse(self.path)
+        path=url.path
+        if path in ACCOUNT_PAGES or path.startswith('/shop/auth/'):
+            return self.send_account(url)
+        response = storefront_response(path, url.query, connect, self.storefront_origin(), self.headers.get('Cookie',''))
+        if response:
+            return self.send_storefront(response)
         with connect() as c:
             if path=='/api/session': return self.send({'setup':not bool(c.execute('SELECT id FROM owner').fetchone()),'authenticated':self.session()})
-            if path=='/api/shop': return self.send({'settings':dict(c.execute('SELECT * FROM settings').fetchone()),'products':record(c,'SELECT id,name,sku,category,price,tax,stock,description,image FROM products WHERE published=1 AND archived=0')})
+            if path=='/api/shop': return self.send({'settings':dict(c.execute('SELECT id,name,address,phone,gstin,footer FROM settings').fetchone()),'products':record(c,'SELECT id,name,sku,category,price,tax,stock,description,image FROM products WHERE published=1 AND archived=0')})
             if path.startswith('/api/'):
                 if not self.session(): return self.send({'error':'Please sign in.'},401)
+                if path=='/api/storefront-demo':
+                    try:
+                        return self.send({'activity':admin_demo_activity()})
+                    except sqlite3.DatabaseError:
+                        return self.send({'error':'Demo activity is temporarily unavailable.'},503)
                 if path=='/api/state':
                     return self.send({**{k:record(c,f'SELECT * FROM {k} ORDER BY id DESC') for k in ['customers','suppliers','orders','purchases','movements','holds','payments','privilege_cards']},'products':record(c,'SELECT * FROM products WHERE archived=0 ORDER BY name'),'settings':dict(c.execute('SELECT * FROM settings').fetchone())})
                 if re.fullmatch(r'/api/orders/\d+',path):
@@ -118,13 +174,20 @@ class Handler(BaseHTTPRequestHandler):
                 if path=='/api/backup':
                     return self.send({k:record(c,f'SELECT * FROM {k}') for k in ['settings','products','customers','suppliers','orders','lines','purchases','movements','holds','payments','privilege_cards']},headers={'Content-Disposition':'attachment; filename=guptha-backup.json'})
                 return self.send({'error':'Not found'},404)
-        file=(ROOT/'public'/('index.html' if path in ['/','/shop'] else path.lstrip('/'))).resolve()
+        file=(ROOT/'public'/('index.html' if path in ['/','/legacy-shop'] else path.lstrip('/'))).resolve()
         if not file.is_relative_to(ROOT/'public') or not file.is_file(): return self.send({'error':'Not found'},404)
         types={'.html':'text/html','.css':'text/css','.js':'application/javascript','.svg':'image/svg+xml','.jpg':'image/jpeg','.jpeg':'image/jpeg','.png':'image/png','.webp':'image/webp'}
         body=file.read_bytes(); self.send_response(200); self.send_header('Content-Type',types.get(file.suffix,'application/octet-stream')); self.send_header('Content-Length',str(len(body))); self.send_header('X-Content-Type-Options','nosniff'); self.end_headers(); self.wfile.write(body)
     def do_POST(self):
-        path=urlparse(self.path).path
+        url=urlparse(self.path)
+        path=url.path
         origin=self.headers.get('Origin')
+        if path in ACCOUNT_PAGES or path.startswith('/shop/auth/'):
+            return self.send_account(url)
+        if path in POST_PATHS:
+            return self.send_storefront(storefront_demo_post(
+                path, self.headers.get('Content-Length'), origin, self.headers.get('Content-Type', ''),
+                self.storefront_origin(), self.rfile.read, connect, self.headers.get('Cookie','')))
         if origin and urlparse(origin).netloc!=self.headers.get('Host'): return self.send({'error':'Cross-origin request rejected'},403)
         try:
             size=int(self.headers.get('Content-Length','0'))
@@ -155,6 +218,31 @@ class Handler(BaseHTTPRequestHandler):
                 if not public and not self.session(): return self.send({'error':'Please sign in.'},401)
                 result={'ok':True}
                 if path=='/api/products':
+                    existing = c.execute('SELECT * FROM products WHERE id=?', (int(data['id']),)).fetchone() if data.get('id') else None
+                    if data.get('id') and not existing:
+                        raise ValueError('Product not found.')
+                    selling_price = money(data.get('price',0))
+                    mrp = money(data['mrp']) if 'mrp' in data else (existing['mrp'] if existing else 0)
+                    featured = data.get('featured_discount', bool(existing['featured_discount']) if existing else False)
+                    verified = data.get('image_verified', bool(existing['image_verified']) if existing else False)
+                    if existing and 'image_verified' not in data and any(
+                        key in data and str(data[key]) != str(existing[key]) for key in ('name','image','brand','variant')
+                    ):
+                        verified = False
+                    if not isinstance(featured, bool) or not isinstance(verified, bool):
+                        raise ValueError('Use checkbox values for featured discount and image verification.')
+                    if mrp and mrp < selling_price:
+                        raise ValueError('MRP must be at least the selling price.')
+                    if featured and (not mrp or (mrp-selling_price)*100 < mrp*20):
+                        raise ValueError('Featured discounts must be at least 20%.')
+                    extra = {key: text(data.get(key, existing[key] if existing else ''), 500)
+                             for key in ('brand','subcategory','variant','reference_url','reference_date','image_source','image_license')}
+                    if extra['reference_url'] and not extra['reference_url'].startswith('https://'):
+                        raise ValueError('Use an HTTPS reference URL.')
+                    if extra['reference_date']:
+                        date.fromisoformat(extra['reference_date'])
+                    if verified and (not extra['image_source'] or not extra['image_license']):
+                        raise ValueError('Record the exact image source and reuse permission before verifying it.')
                     tax=float(data.get('tax',0))
                     if tax not in [0,0.1,0.25,1,1.5,3,5,6,12,18,28,40]: raise ValueError('Select a supported tax rate.')
                     values=(required(data.get('name')),required(data.get('sku')),text(data.get('category')),money(data.get('price',0)),money(data.get('cost',0)),tax,integer(data.get('reorder',5)),int(bool(data.get('published',True))),text(data.get('description'),3000),text(data.get('image',''),500))
@@ -163,6 +251,10 @@ class Handler(BaseHTTPRequestHandler):
                     else:
                         pid=c.execute('INSERT INTO products(name,sku,category,price,cost,tax,reorder,published,description,image) VALUES(?,?,?,?,?,?,?,?,?,?)',values).lastrowid
                         stock(c,pid,integer(data.get('stock',0)),'Opening stock')
+                    pid = int(data['id']) if data.get('id') else pid
+                    c.execute('''UPDATE products SET brand=?,subcategory=?,variant=?,reference_url=?,reference_date=?,
+                                 image_source=?,image_license=?,mrp=?,featured_discount=?,image_verified=? WHERE id=?''',
+                              (*extra.values(), mrp, int(featured), int(verified), pid))
                 elif path=='/api/products/archive': c.execute('UPDATE products SET archived=1,published=0 WHERE id=?',(int(data['id']),))
                 elif path in ['/api/customers','/api/suppliers']:
                     table=path.split('/')[-1]; vals=(required(data.get('name')),text(data.get('phone')),text(data.get('email')),text(data.get('address')))
@@ -282,6 +374,9 @@ class Handler(BaseHTTPRequestHandler):
                     methods=[r[0] for r in c.execute('SELECT DISTINCT method FROM payments WHERE order_id=?',(o['id'],))]
                     c.execute('UPDATE orders SET payment=? WHERE id=?',('Split' if len(methods)>1 else methods[0],o['id']))
                 elif path=='/api/settings': c.execute('UPDATE settings SET name=?,address=?,phone=?,gstin=?,footer=? WHERE id=1',(required(data.get('name')),text(data.get('address')),text(data.get('phone')),text(data.get('gstin')),text(data.get('footer'))))
+                elif path=='/api/storefront-settings':
+                    c.execute('''UPDATE settings SET announcement=?,announcement_link=?,announcement_start=?,
+                                 announcement_end=?,announcement_active=? WHERE id=1''', announcement_values(data))
                 else: return self.send({'error':'Not found'},404)
                 c.commit(); return self.send(result)
         except (ValueError,KeyError,TypeError,sqlite3.IntegrityError) as e: return self.send({'error':'SKU/card number must be unique and selected records must exist.' if isinstance(e,sqlite3.IntegrityError) else str(e)},400)
@@ -289,6 +384,9 @@ class Handler(BaseHTTPRequestHandler):
             print(type(e).__name__,str(e)); return self.send({'error':'Unable to complete this operation. Please try again.'},500)
 
 if __name__=='__main__':
+    if '--demo' in sys.argv[1:]:
+        os.environ.setdefault('GUPTHA_DEMO_CHECKOUT_DB', str(DB.with_name(DB.stem + '-demo-orders.sqlite3')))
+        os.environ.setdefault('GUPTHA_ACCOUNTS_DB', str(DB.with_name(DB.stem + '-demo-accounts.sqlite3')))
     init(); port=int(os.environ.get('PORT','8090'))
     print(f'Guptha Arts running at http://127.0.0.1:{port}',flush=True)
     ThreadingHTTPServer(('127.0.0.1',port),Handler).serve_forever()
