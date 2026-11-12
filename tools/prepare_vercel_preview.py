@@ -39,9 +39,10 @@ def prepare(source, target, checkout_demo=False):
         count = snapshot.execute('SELECT count(*) FROM products').fetchone()[0]
 
     for filename in ('storefront.py', 'storefront_accounts.py', 'storefront_checkout.py', 'storefront_search.py',
-                     'storefront_hosted.py'):
+                     'storefront_hosted.py', 'storefront_stationery.py'):
         shutil.copy2(ROOT / filename, target / filename)
     shutil.copy2(ROOT / 'reference' / 'catalogue-navigation.json', target / 'reference')
+    shutil.copy2(ROOT / 'reference' / 'stationery-demo.json', target / 'reference')
     assets = target / 'public' / 'storefront'
     shutil.copytree(ASSETS, assets, ignore=shutil.ignore_patterns('media'))
     for name in image_names:
@@ -53,7 +54,7 @@ def prepare(source, target, checkout_demo=False):
     (target / 'requirements.txt').write_text(requirements, encoding='utf-8')
     (target / '.python-version').write_text('3.12\n', encoding='utf-8')
     config = {'framework': 'flask', 'functions': {'app.py': {
-        'includeFiles': '{data/retail.sqlite3,reference/catalogue-navigation.json,public/storefront/**}'}}}
+        'includeFiles': '{data/retail.sqlite3,reference/*.json,public/storefront/**}'}}}
     (target / 'vercel.json').write_text(json.dumps(config, indent=2) + '\n', encoding='utf-8')
     flag = 'GUPTHA_HOSTED_DEMO' if checkout_demo else 'GUPTHA_CATALOGUE_PREVIEW'
     (target / 'app.py').write_text(f'''import os

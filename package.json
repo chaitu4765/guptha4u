@@ -2,7 +2,7 @@
   "name": "gupta-storefront-ui",
   "private": true,
   "scripts": {
-    "build:storefront": "esbuild components/storefront.ts components/footer.tsx components/navigation.tsx --bundle --format=esm --splitting --minify --target=es2022 --outdir=public/storefront/vendor",
+    "build:storefront": "esbuild components/storefront.ts components/footer.tsx components/navigation.tsx components/pen-gallery.tsx --bundle --format=esm --splitting --minify --target=es2022 --outdir=public/storefront/vendor",
     "check:ui": "tsc --noEmit"
   },
   "dependencies": {

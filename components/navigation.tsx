@@ -3,11 +3,15 @@ import { DropdownNavigation, type NavItem } from "@/components/ui/dorpdown-navig
 
 const nav = document.querySelector<HTMLElement>("[data-category-navigation]")
 if (nav) {
-  const items: NavItem[] = Array.from(nav.querySelectorAll<HTMLElement>("[data-nav-key]"), element => {
+  const items: NavItem[] = Array.from(nav.children, node => {
+    const element = node as HTMLElement
+    if (element instanceof HTMLAnchorElement) {
+      return { id: element.pathname, label: element.textContent || "", href: element.href, subMenus: [] }
+    }
     const id = element.dataset.navKey || ""
     return {
       id, label: element.querySelector("summary")?.textContent || "",
-      href: "/shop/category/" + id,
+      href: element.dataset.navHref || "/shop/category/" + id,
       subMenus: Array.from(element.querySelectorAll(".nav-branch"), branch => {
         const group = branch.querySelector<HTMLAnchorElement>(".nav-group-link")!
         return {

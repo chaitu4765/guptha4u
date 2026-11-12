@@ -8,6 +8,9 @@ const heart = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="current
 const escapes = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 const escape = value => String(value).replace(/[&<>"']/g, character => escapes[character]);
 const validId = value => /^[1-9][0-9]{0,18}$/.test(value) && BigInt(value) <= 9223372036854775807n;
+const stationeryId = value => /^stationery:[a-z0-9-]{1,120}$/.test(value);
+const savedId = value => validId(value) || stationeryId(value);
+const quantityLimit = product => product?.demo_stationery ? 99 : product?.stock ?? 0;
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' });
 const status = document.querySelector('#store-status');
 const view = document.querySelector('[data-view]');
@@ -42,12 +45,16 @@ function write(key, value) {
 
 function cart() {
   return Object.fromEntries(Object.entries(saved(CART)).filter(([id, quantity]) =>
-    validId(id) && Number.isSafeInteger(quantity) && quantity > 0 && quantity <= 10000000));
+    savedId(id) && Number.isSafeInteger(quantity) && quantity > 0 && quantity <= 10000000));
+}
+
+function checkoutItems() {
+  return Object.fromEntries(Object.entries(cart()).filter(([id]) => validId(id)));
 }
 
 function wishlist() {
   const ids = saved(WISHLIST);
-  return new Set(Array.isArray(ids) ? ids.map(String).filter(validId) : []);
+  return new Set(Array.isArray(ids) ? ids.map(String).filter(savedId) : []);
 }
 
 function updateControls() {
@@ -61,6 +68,9 @@ function updateControls() {
     button.setAttribute('aria-pressed', active);
     button.setAttribute('aria-label', (active ? 'Remove ' : 'Save ') + button.dataset.name + (active ? ' from wishlist' : ''));
   }
+  for (const img of document.querySelectorAll('img[data-product-image]:not([data-image-ready])')) {
+    if (img.complete && img.naturalWidth) img.setAttribute('data-image-ready', '');
+  }
 }
 
 async function catalogue(url) {
@@ -71,8 +81,8 @@ async function catalogue(url) {
 
 async function resolveProducts(ids) {
   const batches = [];
-  for (let index = 0; index < ids.length; index += 100) {
-    batches.push('/api/storefront/products?ids=' + ids.slice(index, index + 100).join(','));
+  for (let index = 0; index < ids.length; index += 40) {
+    batches.push('/api/storefront/products?' + new URLSearchParams({ids: ids.slice(index, index + 40).join(',')}));
   }
   const products = (await Promise.all(batches.map(catalogue))).flat();
   return new Map(products.map(p => [String(p.id), p]));
@@ -94,12 +104,18 @@ function picture(p, width, height, loading = 'lazy') {
 function imageFallback(img) {
   if (img instanceof HTMLImageElement && img.hasAttribute('data-product-image') &&
       img.getAttribute('src') !== PLACEHOLDER) {
+    img.removeAttribute('srcset');
     img.alt = '';
     img.src = PLACEHOLDER;
   }
 }
 
 document.addEventListener('error', event => imageFallback(event.target), true);
+document.addEventListener('load', event => {
+  if (event.target instanceof HTMLImageElement && event.target.hasAttribute('data-product-image')) {
+    event.target.setAttribute('data-image-ready', '');
+  }
+}, true);
 for (const img of document.images) {
   if (img.complete && !img.naturalWidth) imageFallback(img);
 }
@@ -115,47 +131,81 @@ function renderSaved() {
   const ids = isCart ? Object.keys(quantities) : [...wishlist()];
   view.setAttribute('aria-busy', 'false');
   if (!ids.length) {
-    view.innerHTML = isCart ? empty('Your cart is empty', 'Add materials from a product page.') :
+    view.innerHTML = isCart ? `<div class="cart-empty">
+      <div class="cart-empty-copy"><h2>Your cart is empty</h2>
+        <p>Find the materials you need for your next project.</p>
+        <div class="cart-browse">
+          <a class="button" href="/shop/catalogue">Browse art supplies</a>
+          <a class="button outline" href="/shop/stationery">Shop stationery</a>
+        </div>
+      </div>
+      <img src="/storefront/cart-workbench.webp" alt="" width="1000" height="750" decoding="async">
+    </div>` :
       empty('Your wishlist is empty', 'Use the heart button to save a material.');
     updateControls();
     return;
   }
   let subtotal = 0n;
+  let stationerySubtotal = 0n;
   let needsReview = false;
+  const hasStationery = ids.some(stationeryId);
+  const hasArt = ids.some(validId);
   const lines = ids.map(id => {
     const p = currentProducts.get(id);
     const name = escape(p?.name || 'Unavailable item');
-    const available = p && p.stock > 0;
+    const limit = quantityLimit(p);
+    const available = limit > 0;
     const qty = quantities[id];
-    const valid = isCart && available && qty <= p.stock;
+    const valid = isCart && available && qty <= limit;
     const total = valid ? BigInt(p.price) * BigInt(qty) : 0n;
-    subtotal += total;
-    if (isCart && !valid) needsReview = true;
+    if (stationeryId(id)) stationerySubtotal += total;
+    else {
+      subtotal += total;
+      if (isCart && !valid) needsReview = true;
+    }
     const availability = !p ? 'No longer in the catalogue' : !available ? 'Out of stock' :
-      isCart && qty > p.stock ? 'Only ' + p.stock + ' in stock. Update the quantity.' : 'In stock';
+      isCart && qty > limit ? 'Update quantity to ' + limit + ' or fewer.' :
+      p.demo_stationery ? 'Stationery demo' : 'In stock';
     const link = p ? '<a class="cart-item-name" href="' + p.url + '">' + name + '</a>' : '<strong>' + name + '</strong>';
     const action = isCart ? 'data-remove="' + id + '"' : 'data-save="' + id + '" data-name="' + name + '"';
     const quantity = isCart && available ? '<label class="cart-quantity">Quantity<span class="sr-only"> for ' + name +
-      '</span><input type="number" min="1" max="' + p.stock + '" step="1" value="' + qty +
-      '" data-quantity="' + id + '" aria-invalid="' + (qty > p.stock) + '"></label>' : '';
+      '</span><input type="number" min="1" max="' + limit + '" step="1" value="' + qty +
+      '" data-quantity="' + id + '" aria-invalid="' + (qty > limit) + '"></label>' : '';
+    const discount = p?.demo_stationery && p.discount > 0 ? ' <del>' + formatMoney(p.mrp) +
+      '</del> <span class="discount-badge" data-discount-band="' + Math.min(Math.floor(p.discount / 10), 4) * 10 +
+      '">' + Number(p.discount) + '% off</span>' : '';
+    const price = p ? '<p>' + formatMoney(p.price) + ' each' + discount + '</p>' : '';
     return '<li class="cart-line">' + picture(p, 88, 77) +
-      '<div>' + link + (p ? '<p>' + formatMoney(p.price) + ' each</p>' : '') +
+      '<div>' + link + price +
       '<p>' + availability + '</p><button type="button" class="remove" ' + action +
       ' aria-label="Remove ' + name + '">Remove</button></div>' + quantity +
       (valid ? '<span class="line-price">' + formatMoney(total) + '</span>' : '') + '</li>';
   }).join('');
-  view.innerHTML = '<ul class="cart-lines">' + lines + '</ul>' + (isCart ?
-    (needsReview ? '<p class="cart-note">Items that need review are excluded from the subtotal.</p>' : '') +
-    '<div class="subtotal"><span>Subtotal</span><strong>' + formatMoney(subtotal) + '</strong></div>' +
-    (view.dataset.demoCheckout === '1' && !needsReview ?
-      '<div class="cart-checkout"><a class="button" href="/shop/checkout">Continue to checkout</a></div>' : '') : '');
+  const items = '<ul class="cart-lines">' + lines + '</ul>';
+  view.innerHTML = isCart ? '<div class="cart-layout"><div class="cart-items">' + items +
+    '<a class="cart-continue" href="/shop/catalogue">Continue shopping</a></div>' +
+    '<section class="cart-summary" aria-labelledby="cart-summary-heading"><h2 id="cart-summary-heading">Order summary</h2>' +
+    (hasArt ? '<div class="subtotal"><span>' + (hasStationery ? 'Art supplies subtotal' : 'Subtotal') +
+      '</span><strong>' + formatMoney(subtotal) + '</strong></div>' : '') +
+    (hasStationery ? '<div class="subtotal"><span>Stationery demo subtotal</span><strong>' +
+      formatMoney(stationerySubtotal) + '</strong></div><p class="cart-note">Stationery demo items stay in your cart and are excluded from checkout.</p>' : '') +
+    (needsReview ? '<p class="cart-note cart-review">Update or remove items that need review before checkout. They are excluded from the subtotal.</p>' : '') +
+    (view.dataset.demoCheckout === '1' && hasArt && !needsReview ?
+      '<div class="cart-checkout"><a class="button" href="/shop/checkout">' +
+      (hasStationery ? 'Check out art supplies' : 'Continue to checkout') + '</a></div>' : '') + '</section></div>' : items;
   updateControls();
+}
+
+function showProductSkeleton(container) {
+  container.setAttribute('aria-busy', 'true');
+  container.replaceChildren(document.querySelector('#product-skeleton').content.cloneNode(true));
 }
 
 async function refreshSaved() {
   if (!view) return;
   const request = ++viewRequest;
   const ids = isCart ? Object.keys(cart()) : [...wishlist()];
+  if (!viewReady && ids.length) showProductSkeleton(view);
   try {
     const products = await resolveProducts(ids);
     if (request !== viewRequest) return;
@@ -205,8 +255,8 @@ document.addEventListener('change', event => {
   if (!input) return;
   const id = input.dataset.quantity;
   const quantity = input.valueAsNumber;
-  if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > currentProducts.get(id)?.stock) {
-    input.setCustomValidity('Enter a quantity within the available stock.');
+  if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > quantityLimit(currentProducts.get(id))) {
+    input.setCustomValidity('Enter a quantity within the allowed limit.');
     input.reportValidity();
     return;
   }
@@ -233,22 +283,25 @@ document.addEventListener('submit', async event => {
   button.disabled = true;
   button.setAttribute('aria-busy', 'true');
   feedback.classList.remove('cart-added');
-  feedback.textContent = 'Checking stock…';
+  feedback.textContent = stationeryId(id) ? 'Adding to cart…' : 'Checking stock…';
   try {
-    const session = await fetch('/shop/auth/session', { cache: 'no-store' });
-    if (!session.ok) throw new Error('Could not check your sign-in. Try again.');
-    if (!(await session.json()).signed_in) {
-      const next = location.pathname + location.search;
-      try { sessionStorage.setItem(PENDING_ADD, JSON.stringify({ next, id, quantity, time: Date.now() })); } catch {}
-      location.assign('/shop/sign-up?' + new URLSearchParams({ next }));
-      return;
+    if (!stationeryId(id)) {
+      const session = await fetch('/shop/auth/session', { cache: 'no-store' });
+      if (!session.ok) throw new Error('Could not check your sign-in. Try again.');
+      if (!(await session.json()).signed_in) {
+        const next = location.pathname + location.search;
+        try { sessionStorage.setItem(PENDING_ADD, JSON.stringify({ next, id, quantity, time: Date.now() })); } catch {}
+        location.assign('/shop/sign-up?' + new URLSearchParams({ next }));
+        return;
+      }
     }
     const product = (await resolveProducts([id])).get(id);
     const items = cart();
     const total = (items[id] || 0) + quantity;
-    if (!product || !Number.isSafeInteger(quantity) || quantity < 1 || total > product.stock) {
-      feedback.textContent = product?.stock > 0 ? 'Only ' + product.stock + ' in stock, including items already in your cart.' :
-          'This material is currently unavailable.';
+    if (!product || !Number.isSafeInteger(quantity) || quantity < 1 || total > quantityLimit(product)) {
+      feedback.textContent = product?.demo_stationery ? 'The demo cart allows up to 99 of each stationery item.' :
+        product?.stock > 0 ? 'Only ' + product.stock + ' in stock, including items already in your cart.' :
+        'This material is currently unavailable.';
       return;
     }
     write(CART, { ...items, [id]: total });
@@ -327,7 +380,7 @@ if (demoForm) {
 
   async function showCart() {
     const version = ++cartVersion;
-    const items = cart();
+    const items = checkoutItems();
     const ids = Object.keys(items);
     reviewButton.disabled = true;
     try {
@@ -335,9 +388,11 @@ if (demoForm) {
       if (version !== cartVersion) return;
       const valid = ids.length && ids.length <= 100 && ids.every(id => products.get(id)?.stock >= items[id]);
       if (!valid) {
-        summary.innerHTML = '<p>' + (ids.length ? 'Some items need review.' : 'Your cart is empty.') +
-          '</p><a class="button outline" href="' + (ids.length ? '/shop/cart' : '/shop/catalogue') +
-          '">' + (ids.length ? 'Review your cart' : 'Browse materials') + '</a>';
+        const hasItems = Object.keys(cart()).length > 0;
+        const message = ids.length ? 'Some items need review.' : hasItems ? 'No art supplies to check out.' : 'Your cart is empty.';
+        summary.innerHTML = '<p>' + message +
+          '</p><a class="button outline" href="' + (hasItems ? '/shop/cart' : '/shop/catalogue') +
+          '">' + (hasItems ? 'Review your cart' : 'Browse materials') + '</a>';
         return;
       }
       const lines = ids.map(id => ({ ...products.get(id), quantity: items[id],
@@ -418,7 +473,7 @@ if (demoForm) {
     error.textContent = '';
     try {
       if (isCheckout) {
-        const items = cart();
+        const items = checkoutItems();
         const { quote, review } = await send({ ...values, items, action: 'review' });
         reviewed = { ...values, items, review, action: 'order', request_key: crypto.randomUUID() };
         showReview(quote);
@@ -532,7 +587,7 @@ search.addEventListener('input', () => {
     controller = new AbortController();
     const signal = controller.signal;
     try {
-      const response = await fetch('/api/storefront/search?brief=1&q=' + encodeURIComponent(query),
+      const response = await fetch((search.form.dataset.searchApi || '/api/storefront/search') + '?brief=1&q=' + encodeURIComponent(query),
         { signal, cache: 'no-store' });
       if (!response.ok) throw new Error('Search is temporarily unavailable.');
       const result = await response.json();
@@ -555,7 +610,7 @@ search.addEventListener('keydown', event => {
   if (!suggestions.length) return;
   if (event.key === 'Enter' && active >= 0) {
     event.preventDefault();
-    setPageLoading(true);
+    setPageLoading(true, document.body.dataset.department);
     location.assign(suggestions[active].url);
     return;
   }
@@ -591,20 +646,31 @@ updateTopLink();
 
 const stageLoader = document.querySelector('[data-studio-loading]');
 let showLoading;
-function setPageLoading(active) {
+function setPageLoading(active, mode = 'art') {
   if (!stageLoader) return;
   clearTimeout(showLoading);
-  if (active) showLoading = setTimeout(() => { stageLoader.hidden = false; }, 120);
-  else stageLoader.hidden = true;
+  if (active) showLoading = setTimeout(() => {
+    stageLoader.dataset.loadingMode = mode;
+    stageLoader.querySelector('[role=status]').textContent = mode === 'stationery' ? 'Opening Stationery…' : 'Opening the studio…';
+    stageLoader.hidden = false;
+  }, 120);
+  else if (stageLoader.dataset.loadingMode !== 'opening') stageLoader.hidden = true;
 }
 window.addEventListener('pageshow', () => setPageLoading(false));
+search.form.addEventListener('submit', () => {
+  if (document.body.dataset.department === 'stationery') setPageLoading(true, 'stationery');
+});
 document.addEventListener('click', event => {
   const link = event.target.closest('a[href^="/shop"]');
-  if (!link || link.pathname === location.pathname || link.target || event.button ||
+  if (!link || (link.pathname === location.pathname && link.search === location.search) || link.target || event.button ||
       event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-  if (!/^\/shop\/(?:product\/[^/]+|wishlist|cart)$/.test(link.pathname) &&
+  if (link.matches('[data-stationery-object], [data-stationery-back], .studio-object')) return;
+  const stationery = /^\/shop\/stationery(?:\/|$)/.test(link.pathname);
+  if (!stationery && !/^\/shop\/(?:product\/[^/]+|wishlist|cart)$/.test(link.pathname) &&
       !(link.pathname === '/shop' && location.pathname !== '/shop/' && link.matches('.wordmark'))) return;
-  queueMicrotask(() => { if (!event.defaultPrevented) setPageLoading(true); });
+  queueMicrotask(() => {
+    if (!event.defaultPrevented && !link.matches('[data-department-switch]')) setPageLoading(true, stationery ? 'stationery' : 'art');
+  });
 });
 document.addEventListener('keydown', event => {
   if (event.key !== 'Escape') return;
@@ -619,7 +685,7 @@ document.addEventListener('click', event => {
     if (!dropdown.contains(event.target)) dropdown.open = false;
   });
 });
-mobileMenu.addEventListener('keydown', event => {
+mobileMenu?.addEventListener('keydown', event => {
   if (event.key === 'Escape' && mobileMenu.open) {
     mobileMenu.open = false;
     mobileMenu.querySelector('summary').focus();

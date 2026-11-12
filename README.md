@@ -49,6 +49,8 @@ This is a working single-owner, single-store local application, not verified fea
 
 The public storefront provides browsing, wishlist and a browser-local cart with a subtotal before tax. It reads all non-archived products, including unpublished products, by design for the demo. Review the visible descriptions and image associations before any public release. ERP billing and the original local order demo still use their existing tax and payment rules.
 
+Open [the Stationery demo](http://127.0.0.1:8090/shop/stationery) from the storefront navigation. Its prices, product details and pen galleries read the separate snapshot in `reference/stationery-demo.json`. Stationery products appear in the shared cart and wishlist with demo pricing. Art checkout uses the ERP catalogue. Edit the snapshot and replace the matching photos in `public/storefront/stationery/products` to update the assortment.
+
 See [Storefront deployment](STOREFRONT_DEPLOYMENT.md) for local demo setup, image approval and a public-only production server. See the [image audit](PRODUCT_IMAGE_AUDIT.md) for the shipped demo assets.
 
 Public er4u script analysis was performed with REA. Evidence parent: `ev_10d740b28e16b9472755781d4b4f02eec77ceec695bb31cee02fea4239eef26b`; public source SHA-256: `9628f166f9453544aaf21388ac18802411aeba626a66da70c11127160ea906ef`. This static evidence does not establish the private ERP's backend behavior. User Maps reference resolves to Guptas Art Store; business address and catalog have not been inferred or invented.

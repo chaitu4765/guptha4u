@@ -88,9 +88,10 @@ img { display: block; width: 100%; height: auto; }
   .announcement-inner p { flex-basis: 100%; }
 }
 .mast { min-height: 84px; display: grid; grid-template-columns: 1fr minmax(0, 480px) 1fr; align-items: center; gap: var(--gap); }
-.wordmark { display: inline-flex; width: fit-content; flex-direction: column; align-items: flex-start; text-decoration: none; line-height: 1; }
-.wordmark span { font: 400 38px/.9 var(--font-display); }
-.wordmark small { margin-top: 8px; font-size: 11px; font-weight: 700; }
+.wordmark { display: inline-flex; width: fit-content; align-items: center; gap: 9px; text-decoration: none; line-height: 1; }
+.wordmark-logo { display: block; flex: none; width: 54px; height: 54px; border: 1px solid var(--color-line); border-radius: 9px; }
+.wordmark span { font: 400 34px/.9 var(--font-display); }
+.wordmark small { display: block; margin-top: 5px; font-size: 11px; font-weight: 700; white-space: nowrap; }
 .global-search { position: relative; display: flex; }
 .global-search input {
   width: 100%; min-width: 0; min-height: 44px; padding: 8px 48px 8px 16px;
@@ -284,7 +285,8 @@ label:has(> input), label:has(> select) { font-size: 13px; font-weight: 700; }
 @media (max-width: 620px) {
   .mast { grid-template-columns: auto minmax(0, 1fr) auto; min-height: auto; padding-block: 12px; }
   .global-search { grid-area: 2 / 1 / 3 / -1; }
-  .wordmark span { font-size: 32px; }
+  .wordmark-logo { width: 43px; height: 43px; border-radius: 7px; }
+  .wordmark span { font-size: 29px; }
   .wordmark small { font-size: 10px; }
   .utilities { gap: 0; }
   .hero { padding-block: 16px 0; }

@@ -1,5 +1,6 @@
 import { gsap } from "gsap"
 import Lenis from "lenis"
+import "./storefront-loading"
 
 const motion = matchMedia("(prefers-reduced-motion: no-preference)")
 const fine = matchMedia("(hover: hover) and (pointer: fine)")
@@ -104,15 +105,10 @@ fine.addEventListener("change", syncPreferences)
 compact.addEventListener("change", syncPreferences)
 syncPreferences()
 
-const desktop = matchMedia("(min-width: 1201px)")
-const loadNavigation = () => {
-  if (!desktop.matches || !document.querySelector("[data-category-navigation]")) return
-  desktop.removeEventListener("change", loadNavigation)
+if (document.querySelector("[data-category-navigation]")) {
   const entry = "/storefront/vendor/navigation.js"
   void import(entry).catch(() => { /* The native dropdowns stay available. */ })
 }
-desktop.addEventListener("change", loadNavigation)
-loadNavigation()
 
 const footer = document.querySelector("[data-meadow-footer]")
 if (footer) {
