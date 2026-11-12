@@ -1,0 +1,434 @@
+[
+  {
+    "id": "zebra-sarasa-clip-pen-0-5-mm-blue",
+    "group": "writing-marking",
+    "type": "Gel pens",
+    "name": "Zebra Sarasa Clip Gel Pen Set — 0.7 mm",
+    "description": "A gel pen set with quick-drying ink, a rubber grip and spring clips that attach to notebooks or clipboards.",
+    "source": "https://scooboo.in/products/zebra-sarasa-clip-pen-0-5-mm-blue",
+    "image_source": "https://scooboo.in/cdn/shop/files/Zebra_Sarasa_Clip_Gel_Pen_Set_-_0.7mm_copy_4.png?v=1754552874&width=640",
+    "mrp": 49500,
+    "price": 42075
+  },
+  {
+    "id": "turbo-mechanical-pencil-0-5-premium-resin-leads",
+    "group": "writing-marking",
+    "type": "Mechanical pencils",
+    "name": "Kaco Turbo Mechanical Pencil 0.5 Premium + Resin Leads",
+    "description": "A retractable 0.5 mm pencil with resin leads, a cap that covers a mini eraser, and a low centre of gravity.",
+    "source": "https://scooboo.in/products/turbo-mechanical-pencil-0-5-premium-resin-leads",
+    "image_source": "https://scooboo.in/cdn/shop/files/Turbo_Mechanical_Pencil_0.5_Premium_Resin_Leads.png?v=1754909032&width=640",
+    "mrp": 22500,
+    "price": 19125
+  },
+  {
+    "id": "stabilo-boss-pastel-highlighter-pen-set",
+    "group": "writing-marking",
+    "type": "Highlighters",
+    "name": "Stabilo Boss Pastel Highlighter Pen Set",
+    "description": "Pastel highlighters with water-based ink and wedge tips for broad highlighting or narrow underlining.",
+    "source": "https://scooboo.in/products/stabilo-boss-pastel-highlighter-pen-set",
+    "image_source": "https://scooboo.in/cdn/shop/files/Stabilo_Boss_Pastel_Highlighter_Pen_Set_1_aac1eb35-93a3-4779-9dc8-f66466350adb.jpg?v=1763727158&width=640",
+    "mrp": 69000,
+    "price": 58650
+  },
+  {
+    "id": "scholar-a5-legend-notebook",
+    "group": "paper-planning",
+    "type": "Notebooks",
+    "name": "Scholar Legend A5 Notebook",
+    "description": "A compact A5 notebook with ruled pages and a sturdy cover for daily notes or journaling.",
+    "source": "https://scooboo.in/products/scholar-a5-legend-notebook",
+    "image_source": "https://scooboo.in/cdn/shop/files/Scholar_A5_Legend_Notebook-13.jpg?v=1757590059&width=640",
+    "mrp": 47500,
+    "price": 42750
+  },
+  {
+    "id": "bold-week-planer-bold-rewritable-board",
+    "group": "paper-planning",
+    "type": "Planners",
+    "name": "Gifts of Love Rewritable Weekly Planner With Marker",
+    "description": "A reusable weekly board with an erasable surface and a black bullet-tip marker for schedules and reminders.",
+    "source": "https://scooboo.in/products/bold-week-planer-bold-rewritable-board",
+    "image_source": "https://scooboo.in/cdn/shop/files/31.5x17.5_cm_Gifts_of_Love_Rewritable_Weekly_Planner_With_Marker.jpg?v=1766377410&width=640",
+    "mrp": 55000,
+    "price": 46750
+  },
+  {
+    "id": "post-it-yellow-notes-2-3-inch",
+    "group": "paper-planning",
+    "type": "Sticky notes",
+    "name": "Post-it Yellow Notes",
+    "description": "A pad of 100 plain yellow sheets that can be removed and repositioned for notes and reminders.",
+    "source": "https://scooboo.in/products/post-it-yellow-notes-2-3-inch",
+    "image_source": "https://scooboo.in/cdn/shop/files/Post-it.jpg?v=1765274061&width=640",
+    "mrp": 13000,
+    "price": 11700
+  },
+  {
+    "id": "kangaro-hd-10d-stapler",
+    "group": "office-tools",
+    "type": "Staplers",
+    "name": "Kangaro HD-10D Stapler — Red",
+    "description": "A reinforced stapler that holds 100 No. 10 staples and can fasten up to 20 sheets at once.",
+    "source": "https://scooboo.in/products/kangaro-hd-10d-stapler",
+    "image_source": "https://scooboo.in/cdn/shop/files/Red_Kangaro_HD-10D_Stapler.jpg?v=1770977771&width=640",
+    "mrp": 12400,
+    "price": 11780
+  },
+  {
+    "id": "sun-star-mini-portable-scissors",
+    "group": "office-tools",
+    "type": "Scissors",
+    "name": "Sun Star Mini Portable Scissors",
+    "description": "Compact scissors with stainless steel blades for cutting paper, tape and other light materials.",
+    "source": "https://scooboo.in/products/sun-star-mini-portable-scissors",
+    "image_source": "https://scooboo.in/cdn/shop/files/Sun_Star_Mini_Portable_Scissors-6.jpg?v=1761647694&width=640",
+    "mrp": 55000,
+    "price": 46750
+  },
+  {
+    "id": "kangaro-paper-punch-dp-52-y",
+    "group": "office-tools",
+    "type": "Punches",
+    "name": "Kangaro DP 52 Punch Machine — Green",
+    "description": "A metal two-hole punch with 80 mm spacing. It handles up to 10 sheets and makes 5 mm holes.",
+    "source": "https://scooboo.in/products/kangaro-paper-punch-dp-52-y",
+    "image_source": "https://scooboo.in/cdn/shop/files/green_Kangaro_Paper_Punch_DP-52_Y.jpg?v=1769751169&width=640",
+    "mrp": 22000,
+    "price": 19800
+  },
+  {
+    "id": "deli-classic-clip-binders",
+    "group": "office-tools",
+    "type": "Binder clips",
+    "name": "Deli Classic Clip Binders — 15 mm",
+    "description": "Spring steel binder clips for holding documents and loose notes together. The plated finish resists rust.",
+    "source": "https://scooboo.in/products/deli-classic-clip-binders",
+    "image_source": "https://scooboo.in/cdn/shop/files/15mm.jpg?v=1769057813&width=640",
+    "mrp": 9000,
+    "price": 8100
+  },
+  {
+    "id": "solo-desk-organizer",
+    "group": "files-desk-organization",
+    "type": "Desk organizers",
+    "name": "Solo Plastic Desk Organizer",
+    "description": "A compact plastic organizer with separate compartments for writing tools, clips, notes and other desk supplies.",
+    "source": "https://scooboo.in/products/solo-desk-organizer",
+    "image_source": "https://scooboo.in/cdn/shop/files/Solo_Desk_Organizer-6.jpg?v=1757659143&width=640",
+    "mrp": 22500,
+    "price": 20250
+  },
+  {
+    "id": "kaco-storage-tray-desktop",
+    "group": "files-desk-organization",
+    "type": "Storage trays",
+    "name": "Kaco Lemo Storage Box Desktop",
+    "description": "A shallow ABS storage tray with compartments of different sizes for a desktop or drawer.",
+    "source": "https://scooboo.in/products/kaco-storage-tray-desktop",
+    "image_source": "https://scooboo.in/cdn/shop/files/Kaco_Lemo_Storage_Box_Desktop_1.jpg?v=1765182282&width=640",
+    "mrp": 80000,
+    "price": 68000
+  },
+  {
+    "id": "solo-clear-folder",
+    "group": "files-desk-organization",
+    "type": "Files",
+    "name": "Solo A4 Clear Folder Set",
+    "description": "A set of transparent A4 folders that protect papers while keeping the contents visible.",
+    "source": "https://scooboo.in/products/solo-clear-folder",
+    "image_source": "https://scooboo.in/cdn/shop/files/Solo_A4_Clear_Folder-Pack_Of_20.jpg?v=1758513770&width=640",
+    "mrp": 29500,
+    "price": 26550
+  },
+  {
+    "id": "deli-glue-stick-1",
+    "group": "adhesives-office-supplies",
+    "type": "Glue sticks",
+    "name": "Deli Glue Stick",
+    "description": "A twist-up glue stick that applies evenly and dries quickly on paper, card and photos.",
+    "source": "https://scooboo.in/products/deli-glue-stick-1",
+    "image_source": "https://scooboo.in/cdn/shop/files/Deli_Glue_Stick-5.jpg?v=1770447117&width=640",
+    "mrp": 2000,
+    "price": 1900
+  },
+  {
+    "id": "deli-812-tape-dispenser",
+    "group": "adhesives-office-supplies",
+    "type": "Tape dispensers",
+    "name": "Deli 812 Tape Dispenser",
+    "description": "An ABS desk dispenser with a weighted, padded base and wheels for 1-inch and 3-inch tape cores.",
+    "source": "https://scooboo.in/products/deli-812-tape-dispenser",
+    "image_source": "https://scooboo.in/cdn/shop/products/deli-812-tape-dispenser-tape-dispenser-scooboo-149225.jpg?v=1706543263&width=640",
+    "mrp": 44000,
+    "price": 39600
+  },
+  {
+    "id": "deli-30110-invisible-tape",
+    "group": "adhesives-office-supplies",
+    "type": "Tapes",
+    "name": "Deli Invisible Tape",
+    "description": "A matte tape for repairing paper or sealing envelopes. The surface can be written on with a pen, pencil or marker.",
+    "source": "https://scooboo.in/products/deli-30110-invisible-tape",
+    "image_source": "https://scooboo.in/cdn/shop/files/Deli_Invisible_Tape.jpg?v=1770701164&width=640",
+    "mrp": 7500,
+    "price": 6750
+  },
+  {
+    "id": "maped-metal-geometry-box",
+    "group": "school-geometry",
+    "type": "Geometry sets",
+    "name": "Maped Metal Geometry Box",
+    "description": "A metal school geometry case with a compass, protractor, set square, ruler, pencil and eraser.",
+    "source": "https://scooboo.in/products/maped-metal-geometry-box",
+    "image_source": "https://scooboo.in/cdn/shop/files/Maped_Metal_Geometry_Box-6_1314ad5f-c47b-41e8-b6cd-f5fc873e1a35.jpg?v=1764583507&width=640",
+    "mrp": 52500,
+    "price": 49875
+  },
+  {
+    "id": "right-choice-ruler-set",
+    "group": "school-geometry",
+    "type": "Rulers",
+    "name": "Kaco Right Choice Ruler Set",
+    "description": "A measuring set with straight and triangular rulers marked in both inches and metric units.",
+    "source": "https://scooboo.in/products/right-choice-ruler-set",
+    "image_source": "https://scooboo.in/cdn/shop/files/Kaco_Right_Choice_Ruler_Set.jpg?v=1765261202&width=640",
+    "mrp": 20000,
+    "price": 17000
+  },
+  {
+    "id": "deli-w1589-modern-compact-calculator-12-digit",
+    "group": "school-geometry",
+    "type": "Calculators",
+    "name": "Deli Modern Compact Calculator",
+    "description": "A 12-digit desktop calculator with a tilted LCD, large keys and non-slip pads at the corners.",
+    "source": "https://scooboo.in/products/deli-w1589-modern-compact-calculator-12-digit",
+    "image_source": "https://scooboo.in/cdn/shop/files/Deli_Modern_Compact_Calculator_12_Digit-2.jpg?v=1770621206&width=640",
+    "mrp": 68500,
+    "price": 58225
+  },
+  {
+    "id": "retro-fountain-pen-m-nib",
+    "group": "grandfathers-collection",
+    "type": "Fountain pens",
+    "name": "Kaco Retro Fountain Pen",
+    "description": "A retro-styled fountain pen with a metal clip. The box includes a converter and two cartridges.",
+    "source": "https://scooboo.in/products/retro-fountain-pen-m-nib",
+    "image_source": "https://scooboo.in/cdn/shop/files/Retro_Fountain_Pen_in_Paper_Box-7.png?v=1765177762&width=640",
+    "shelf": {
+      "clip": "polygon(49.8% 9.4%, 51.4% 9.9%, 52.5% 11.4%, 53.3% 14.4%, 53.7% 19%, 53.6% 43.5%, 53.3% 46%, 53.3% 76%, 53% 83.7%, 52.3% 88.3%, 51.1% 90.4%, 49.5% 90.8%, 48.2% 89.5%, 47.4% 86.2%, 46.9% 80%, 46.7% 45%, 46.2% 42.7%, 46.2% 18.7%, 46.5% 14.7%, 47.1% 12%, 48.3% 10.4%)",
+      "transform": "translateY(5%)"
+    },
+    "mrp": 97500,
+    "price": 82875
+  },
+  {
+    "id": "lamy-dialog-palladium",
+    "name": "Lamy Dialog Palladium",
+    "group": "premium-pens",
+    "type": "Fountain pens",
+    "description": "A palladium-finish fountain pen with a retractable gold nib and twist mechanism.",
+    "mrp": 4700000,
+    "price": 3995000,
+    "source": "https://scooboo.in/products/lamy-074-fp-dialog-palladium-m-go-t10bl-fountain-pen",
+    "image_source": "https://scooboo.in/cdn/shop/files/Lamy_Dialog_Palladium_Fountain_Pen.jpg?v=1768461500&width=640",
+    "rail": [
+      {
+        "src": "/storefront/stationery/products/lamy-dialog-palladium.webp",
+        "label": "Front",
+        "clip": "polygon(48.75% 9.38%,48.12% 9.69%,47.66% 10.00%,47.34% 10.31%,47.19% 10.62%,46.41% 12.03%,46.09% 13.44%,46.09% 14.84%,46.09% 16.25%,46.09% 17.66%,46.09% 19.06%,46.09% 20.47%,46.09% 21.88%,46.09% 23.28%,46.09% 24.69%,46.09% 26.09%,46.09% 27.50%,46.09% 28.91%,46.09% 30.31%,46.09% 31.72%,46.09% 33.12%,46.09% 34.53%,46.09% 35.94%,46.09% 37.34%,46.09% 38.75%,46.09% 40.16%,46.09% 41.56%,46.09% 42.97%,46.09% 44.38%,46.09% 45.78%,46.09% 47.19%,46.09% 48.59%,46.09% 50.00%,46.09% 51.41%,46.09% 52.81%,46.09% 54.22%,46.09% 55.62%,46.09% 57.03%,46.09% 58.44%,46.09% 59.84%,46.09% 61.25%,46.09% 62.66%,46.09% 64.06%,46.09% 65.47%,46.09% 66.88%,46.09% 68.28%,46.09% 69.69%,46.09% 71.09%,46.09% 72.50%,46.09% 73.91%,46.09% 75.31%,46.09% 76.72%,46.09% 78.12%,46.25% 79.53%,46.72% 80.94%,47.97% 82.34%,47.97% 83.75%,47.97% 85.16%,48.12% 86.56%,48.75% 87.34%,48.75% 87.66%,48.75% 87.97%,48.75% 88.28%,48.75% 88.59%,48.75% 88.91%,48.75% 89.22%,48.91% 89.53%,48.91% 89.84%,49.06% 90.00%,49.69% 90.00%,49.69% 89.84%,49.84% 89.53%,49.84% 89.22%,49.84% 88.91%,50.00% 88.59%,50.00% 88.28%,50.16% 87.97%,50.16% 87.66%,50.31% 87.34%,50.47% 86.56%,50.78% 85.16%,51.41% 83.75%,51.25% 82.34%,52.81% 80.94%,53.28% 79.53%,53.28% 78.12%,53.28% 76.72%,53.28% 75.31%,53.28% 73.91%,53.28% 72.50%,53.28% 71.09%,53.28% 69.69%,53.28% 68.28%,53.28% 66.88%,53.28% 65.47%,53.28% 64.06%,53.28% 62.66%,53.28% 61.25%,53.28% 59.84%,53.28% 58.44%,53.28% 57.03%,53.28% 55.62%,53.28% 54.22%,53.28% 52.81%,53.28% 51.41%,53.28% 50.00%,53.28% 48.59%,53.28% 47.19%,53.28% 45.78%,53.28% 44.38%,53.28% 42.97%,53.28% 41.56%,53.28% 40.16%,53.28% 38.75%,53.28% 37.34%,53.28% 35.94%,53.28% 34.53%,53.28% 33.12%,53.28% 31.72%,53.28% 30.31%,53.28% 28.91%,53.28% 27.50%,53.28% 26.09%,53.28% 24.69%,53.28% 23.28%,53.28% 21.88%,53.28% 20.47%,53.28% 19.06%,53.28% 17.66%,53.28% 16.25%,53.28% 14.84%,53.12% 13.44%,52.97% 12.03%,52.19% 10.62%,52.03% 10.31%,51.72% 10.00%,51.25% 9.69%,50.62% 9.38%)",
+        "transform": "scale(1.104) translate(0.39%,0.31%)",
+        "detailSrc": "/storefront/stationery/products/lamy-dialog-palladium-detail.webp"
+      },
+      {
+        "src": "/storefront/stationery/products/lamy-dialog-palladium-view-1.webp",
+        "label": "Alternate view",
+        "clip": "polygon(46.72% 1.84%,45.94% 4.32%,45.63% 6.80%,45.62% 9.28%,45.62% 11.76%,45.62% 14.24%,45.62% 16.72%,45.62% 19.20%,45.62% 21.68%,45.62% 24.16%,45.62% 26.64%,45.62% 29.12%,45.62% 31.60%,45.62% 34.08%,45.62% 36.56%,45.62% 39.05%,45.62% 41.53%,45.62% 44.01%,45.62% 46.49%,45.62% 48.97%,45.62% 51.45%,45.62% 53.93%,45.62% 56.41%,45.62% 58.89%,45.62% 61.37%,45.62% 63.85%,45.62% 66.33%,45.62% 68.81%,45.62% 71.29%,45.62% 73.77%,45.62% 76.26%,45.62% 78.74%,45.62% 81.22%,45.62% 83.70%,45.63% 86.18%,46.40% 88.66%,47.66% 91.15%,47.66% 93.63%,48.28% 96.12%,48.59% 98.60%,50.15% 98.61%,50.62% 96.13%,51.56% 93.66%,51.87% 91.18%,53.43% 88.71%,54.07% 86.23%,54.22% 83.75%,54.22% 81.27%,54.22% 78.79%,54.22% 76.31%,54.22% 73.83%,54.22% 71.35%,54.22% 68.86%,54.22% 66.38%,54.22% 63.90%,54.22% 61.42%,54.22% 58.94%,54.22% 56.46%,54.22% 53.98%,54.22% 51.50%,54.22% 49.02%,54.22% 46.54%,54.22% 44.06%,54.22% 41.58%,54.22% 39.10%,54.22% 36.62%,54.22% 34.14%,54.22% 31.65%,54.22% 29.17%,54.22% 26.69%,54.22% 24.21%,54.23% 21.73%,54.22% 19.25%,54.22% 16.77%,54.22% 14.29%,54.22% 11.81%,54.22% 9.33%,54.22% 6.85%,54.06% 4.37%,53.13% 1.88%)",
+        "transform": "rotate(-0.34deg) scale(0.897) translate(0.11%,-0.23%)",
+        "detailSrc": "/storefront/stationery/products/lamy-dialog-palladium-view-1-detail.webp"
+      }
+    ]
+  },
+  {
+    "id": "penlux-grande-wave-blue",
+    "name": "Penlux Grande Wave — Blue",
+    "group": "premium-pens",
+    "type": "Fountain pens",
+    "description": "Blue marbled resin with a rounded cap and a polished clip.",
+    "mrp": 2690000,
+    "price": 2421000,
+    "source": "https://scooboo.in/products/penlux-masterpiece-grande-wave-fountain-pens",
+    "image_source": "https://scooboo.in/cdn/shop/files/Blue_Penlux_Masterpiece_Grande_Wave_Fountain_Pens.jpg?v=1771414508&width=640",
+    "rail": [
+      {
+        "src": "/storefront/stationery/products/penlux-grande-wave-blue.webp",
+        "label": "Front",
+        "clip": "polygon(50.00% 9.22%,49.53% 9.53%,49.06% 9.84%,48.75% 10.16%,48.44% 10.47%,47.97% 11.88%,47.66% 13.28%,47.34% 14.69%,47.19% 16.09%,47.19% 17.50%,46.88% 18.91%,46.88% 20.31%,46.88% 21.72%,46.72% 23.12%,46.72% 24.53%,46.72% 25.94%,46.56% 27.34%,46.56% 28.75%,46.56% 30.16%,46.56% 31.56%,46.41% 32.97%,46.41% 34.38%,46.41% 35.78%,46.41% 37.19%,46.41% 38.59%,46.41% 40.00%,46.41% 41.41%,46.41% 42.81%,46.41% 44.22%,46.56% 45.62%,47.34% 47.03%,47.34% 48.44%,47.34% 49.84%,47.34% 51.25%,47.34% 52.66%,47.34% 54.06%,47.34% 55.47%,47.34% 56.88%,47.34% 58.28%,47.34% 59.69%,47.34% 61.09%,47.34% 62.50%,47.34% 63.91%,47.34% 65.31%,47.34% 66.72%,47.34% 68.12%,47.34% 69.53%,47.34% 70.94%,47.34% 72.34%,47.34% 73.75%,47.50% 75.16%,47.50% 76.56%,47.66% 77.97%,47.81% 79.38%,47.81% 80.78%,47.97% 82.19%,48.12% 83.59%,48.44% 85.00%,48.59% 86.41%,48.75% 87.34%,48.91% 87.66%,48.91% 87.97%,48.91% 88.28%,49.06% 88.59%,49.06% 88.91%,49.22% 89.22%,49.38% 89.53%,49.69% 89.84%,49.69% 90.00%,53.12% 90.00%,53.12% 89.84%,53.44% 89.53%,53.59% 89.22%,53.75% 88.91%,53.75% 88.59%,53.91% 88.28%,53.91% 87.97%,54.06% 87.66%,54.06% 87.34%,54.22% 86.41%,54.53% 85.00%,54.69% 83.59%,54.84% 82.19%,55.00% 80.78%,55.16% 79.38%,55.31% 77.97%,55.31% 76.56%,55.31% 75.16%,55.31% 73.75%,55.31% 72.34%,55.31% 70.94%,55.31% 69.53%,55.31% 68.12%,55.31% 66.72%,55.31% 65.31%,55.31% 63.91%,55.31% 62.50%,55.31% 61.09%,55.31% 59.69%,55.31% 58.28%,55.31% 56.88%,55.16% 55.47%,55.16% 54.06%,55.16% 52.66%,55.16% 51.25%,55.16% 49.84%,55.00% 48.44%,55.00% 47.03%,55.78% 45.62%,55.94% 44.22%,55.94% 42.81%,55.94% 41.41%,55.78% 40.00%,55.78% 38.59%,55.78% 37.19%,55.78% 35.78%,55.78% 34.38%,55.78% 32.97%,55.78% 31.56%,55.62% 30.16%,55.62% 28.75%,55.62% 27.34%,55.62% 25.94%,55.47% 24.53%,55.47% 23.12%,55.47% 21.72%,55.31% 20.31%,55.31% 18.91%,55.16% 17.50%,55.00% 16.09%,54.84% 14.69%,54.69% 13.28%,54.38% 11.88%,53.91% 10.47%,53.59% 10.16%,53.28% 9.84%,52.97% 9.53%,52.34% 9.22%)",
+        "transform": "scale(1.102) translate(-1.02%,0.39%)",
+        "detailSrc": "/storefront/stationery/products/penlux-grande-wave-blue-detail.webp"
+      }
+    ]
+  },
+  {
+    "id": "lamy-dialog-cc-blue",
+    "name": "LAMY dialog cc — Matte Blue",
+    "group": "premium-pens",
+    "type": "Fountain pens",
+    "description": "A matte blue capless fountain pen with rose gold accents and a retractable 14k gold nib.",
+    "mrp": 6600000,
+    "price": 5610000,
+    "source": "https://scooboo.in/products/lamy-081-dialog-cc-all-black-fountain-pen",
+    "image_source": "https://scooboo.in/cdn/shop/files/Lamy_081_Dialog_CC_Fountain_Pen.png?v=1754911378&width=640",
+    "rail": [
+      {
+        "src": "/storefront/stationery/products/lamy-dialog-cc-blue.webp",
+        "label": "Front",
+        "clip": "polygon(48.59% 10.62%,48.28% 10.94%,47.34% 11.25%,46.09% 11.56%,46.09% 11.88%,46.09% 13.28%,46.09% 14.69%,46.09% 16.09%,46.09% 17.50%,46.09% 18.91%,46.09% 20.31%,46.09% 21.72%,46.09% 23.12%,46.09% 24.53%,46.09% 25.94%,46.09% 27.34%,46.09% 28.75%,46.09% 30.16%,46.09% 31.56%,46.09% 32.97%,46.09% 34.38%,46.09% 35.78%,46.09% 37.19%,46.09% 38.59%,46.09% 40.00%,46.09% 41.41%,46.09% 42.81%,46.09% 44.22%,46.09% 45.62%,46.09% 47.03%,46.09% 48.44%,46.09% 49.84%,46.09% 51.25%,46.09% 52.66%,46.09% 54.06%,46.09% 55.47%,46.09% 56.88%,46.09% 58.28%,46.09% 59.69%,46.09% 61.09%,46.09% 62.50%,46.09% 63.91%,46.09% 65.31%,46.09% 66.72%,46.25% 68.12%,46.25% 69.53%,46.25% 70.94%,46.25% 72.34%,46.25% 73.75%,46.25% 75.16%,46.25% 76.56%,46.25% 77.97%,46.72% 79.38%,47.50% 80.78%,48.59% 82.19%,49.38% 83.59%,48.75% 85.00%,48.91% 86.41%,48.91% 87.34%,48.91% 87.66%,48.91% 87.97%,49.06% 88.28%,49.06% 88.59%,49.06% 88.91%,49.22% 89.22%,49.38% 89.53%,49.53% 89.84%,49.53% 90.00%,50.00% 90.00%,50.00% 89.84%,50.00% 89.53%,50.16% 89.22%,50.16% 88.91%,50.16% 88.59%,50.31% 88.28%,50.31% 87.97%,50.31% 87.66%,50.47% 87.34%,50.62% 86.41%,51.09% 85.00%,51.72% 83.59%,51.56% 82.19%,52.03% 80.78%,53.28% 79.38%,53.75% 77.97%,53.91% 76.56%,53.91% 75.16%,53.91% 73.75%,53.91% 72.34%,53.91% 70.94%,53.91% 69.53%,53.91% 68.12%,53.91% 66.72%,53.91% 65.31%,53.91% 63.91%,53.91% 62.50%,53.91% 61.09%,53.91% 59.69%,53.91% 58.28%,53.91% 56.88%,53.91% 55.47%,53.91% 54.06%,53.91% 52.66%,53.91% 51.25%,53.91% 49.84%,53.91% 48.44%,53.91% 47.03%,53.91% 45.62%,53.91% 44.22%,53.91% 42.81%,53.91% 41.41%,53.91% 40.00%,53.91% 38.59%,53.91% 37.19%,53.91% 35.78%,53.91% 34.38%,53.91% 32.97%,53.91% 31.56%,53.91% 30.16%,53.91% 28.75%,53.91% 27.34%,53.91% 25.94%,53.91% 24.53%,53.91% 23.12%,53.91% 21.72%,53.91% 20.31%,53.91% 18.91%,53.91% 17.50%,53.75% 16.09%,53.91% 14.69%,53.75% 13.28%,53.91% 11.88%,53.59% 11.56%,53.12% 11.25%,51.25% 10.94%,48.75% 10.62%)",
+        "transform": "scale(1.121) translate(0.08%,-0.31%)",
+        "detailSrc": "/storefront/stationery/products/lamy-dialog-cc-blue-detail.webp"
+      },
+      {
+        "src": "/storefront/stationery/products/lamy-dialog-cc-blue-view-1.webp",
+        "label": "Nib detail",
+        "clip": "polygon(96.54% 0.00%,92.05% 0.00%,87.34% 0.00%,82.69% 0.04%,78.38% 0.62%,75.78% 2.90%,73.42% 5.41%,70.99% 7.85%,68.63% 10.36%,66.19% 12.79%,63.77% 15.24%,61.40% 17.74%,59.04% 20.25%,56.61% 22.69%,54.25% 25.20%,51.82% 27.65%,49.40% 30.09%,47.04% 32.60%,44.67% 35.10%,42.24% 37.55%,39.88% 40.05%,37.46% 42.50%,35.09% 45.00%,32.73% 47.51%,30.31% 49.96%,27.95% 52.47%,25.59% 54.99%,23.54% 57.79%,21.90% 61.01%,20.57% 64.54%,20.33% 69.13%,18.22% 71.88%,15.93% 74.46%,13.59% 76.99%,11.29% 79.56%,9.81% 82.93%,8.00% 85.99%,5.65% 88.51%,3.54% 91.26%,1.73% 94.31%,3.36% 95.92%,6.04% 93.72%,8.80% 91.60%,11.77% 89.70%,14.77% 87.81%,17.92% 86.07%,21.92% 85.18%,24.34% 82.73%,26.62% 80.15%,29.86% 78.50%,34.26% 77.99%,37.87% 76.72%,41.02% 74.98%,43.77% 72.86%,46.27% 70.49%,48.71% 68.06%,51.15% 65.62%,53.59% 63.19%,56.02% 60.75%,58.39% 58.25%,60.81% 55.80%,63.18% 53.30%,65.60% 50.85%,68.03% 48.42%,70.40% 45.91%,72.76% 43.41%,75.19% 40.97%,77.56% 38.46%,79.99% 36.02%,82.41% 33.57%,84.78% 31.08%,87.20% 28.63%,89.58% 26.13%,92.00% 23.68%,94.37% 21.18%,96.80% 18.74%,99.08% 16.15%,100.00% 12.23%,100.00% 7.63%,100.00% 3.18%)",
+        "transform": "rotate(-44.52deg) scale(0.646) translate(-0.20%,2.21%)",
+        "detailSrc": "/storefront/stationery/products/lamy-dialog-cc-blue-view-1-detail.webp"
+      }
+    ]
+  },
+  {
+    "id": "penlux-grande-wave-marble",
+    "name": "Penlux Grande Wave — Marble",
+    "group": "premium-pens",
+    "type": "Fountain pens",
+    "description": "A marbled resin barrel with warm red and gold tones.",
+    "mrp": 2690000,
+    "price": 2421000,
+    "source": "https://scooboo.in/products/penlux-masterpiece-grande-wave-fountain-pens",
+    "image_source": "https://scooboo.in/cdn/shop/files/Marble_Penlux_Masterpiece_Grande_Wave_Fountain_Pens.jpg?v=1771414508&width=640",
+    "rail": [
+      {
+        "src": "/storefront/stationery/products/penlux-grande-wave-marble.webp",
+        "label": "Front",
+        "clip": "polygon(49.53% 9.06%,48.28% 9.38%,47.97% 9.69%,47.66% 10.00%,47.34% 10.31%,46.72% 11.72%,46.41% 13.12%,46.25% 14.53%,46.09% 15.94%,45.94% 17.34%,45.94% 18.75%,45.78% 20.16%,45.78% 21.56%,45.78% 22.97%,45.62% 24.38%,45.62% 25.78%,45.62% 27.19%,45.62% 28.59%,45.47% 30.00%,45.47% 31.41%,45.47% 32.81%,45.47% 34.22%,45.31% 35.62%,45.31% 37.03%,45.31% 38.44%,45.31% 39.84%,45.31% 41.25%,45.31% 42.66%,45.31% 44.06%,45.47% 45.47%,46.25% 46.88%,46.25% 48.28%,46.25% 49.69%,46.25% 51.09%,46.25% 52.50%,46.25% 53.91%,46.25% 55.31%,46.25% 56.72%,46.25% 58.12%,46.25% 59.53%,46.25% 60.94%,46.25% 62.34%,46.25% 63.75%,46.25% 65.16%,46.25% 66.56%,46.25% 67.97%,46.25% 69.38%,46.25% 70.78%,46.41% 72.19%,46.41% 73.59%,46.41% 75.00%,46.41% 76.41%,46.56% 77.81%,46.88% 79.22%,47.03% 80.62%,47.03% 82.03%,47.19% 83.44%,47.34% 84.84%,47.66% 86.25%,47.81% 87.34%,47.81% 87.66%,47.97% 87.97%,48.12% 88.28%,48.12% 88.59%,48.28% 88.91%,48.44% 89.22%,48.59% 89.53%,48.75% 89.84%,48.91% 90.00%,52.19% 90.00%,52.34% 89.84%,52.34% 89.53%,52.66% 89.22%,52.81% 88.91%,52.81% 88.59%,52.97% 88.28%,53.12% 87.97%,53.12% 87.66%,53.28% 87.34%,53.44% 86.25%,53.59% 84.84%,53.75% 83.44%,53.91% 82.03%,53.91% 80.62%,54.06% 79.22%,54.38% 77.81%,54.38% 76.41%,54.38% 75.00%,54.38% 73.59%,54.38% 72.19%,54.38% 70.78%,54.38% 69.38%,54.38% 67.97%,54.38% 66.56%,54.38% 65.16%,54.38% 63.75%,54.38% 62.34%,54.38% 60.94%,54.38% 59.53%,54.22% 58.12%,54.22% 56.72%,54.22% 55.31%,54.22% 53.91%,54.06% 52.50%,54.06% 51.09%,54.06% 49.69%,54.06% 48.28%,53.91% 46.88%,54.69% 45.47%,54.69% 44.06%,54.69% 42.66%,54.69% 41.25%,54.69% 39.84%,54.69% 38.44%,54.69% 37.03%,54.69% 35.62%,54.69% 34.22%,54.53% 32.81%,54.53% 31.41%,54.53% 30.00%,54.53% 28.59%,54.38% 27.19%,54.38% 25.78%,54.38% 24.38%,54.38% 22.97%,54.22% 21.56%,54.22% 20.16%,54.22% 18.75%,54.06% 17.34%,54.06% 15.94%,53.91% 14.53%,53.75% 13.12%,53.44% 11.72%,52.81% 10.31%,52.50% 10.00%,52.19% 9.69%,51.88% 9.38%,50.31% 9.06%)",
+        "transform": "scale(1.100) translate(0.08%,0.47%)",
+        "detailSrc": "/storefront/stationery/products/penlux-grande-wave-marble-detail.webp"
+      }
+    ]
+  },
+  {
+    "id": "ystudio-classic-fountain-pen-brass",
+    "group": "premium-pens",
+    "type": "Fountain pens",
+    "name": "Ystudio Classic Fountain Pen — Brass",
+    "description": "A solid brass fountain pen that develops a patina over time. It accepts cartridges or a converter.",
+    "source": "https://scooboo.in/products/ystudio-classic-fountain-pen-brass",
+    "image_source": "https://scooboo.in/cdn/shop/files/Brass_Ystudio_Classic_Fountain_Pen.jpg?v=1765857943&width=640",
+    "mrp": 1720000,
+    "price": 1548000,
+    "rail": [
+      {
+        "src": "/storefront/stationery/products/ystudio-classic-fountain-pen-brass.webp",
+        "label": "Front",
+        "clip": "polygon(47.50% 9.38%,46.88% 9.69%,46.56% 10.00%,46.41% 10.31%,46.25% 10.62%,46.25% 12.03%,46.25% 13.44%,46.25% 14.84%,46.25% 16.25%,46.25% 17.66%,46.25% 19.06%,46.25% 20.47%,46.25% 21.88%,46.25% 23.28%,46.25% 24.69%,46.25% 26.09%,46.25% 27.50%,46.25% 28.91%,46.41% 30.31%,46.25% 31.72%,46.41% 33.12%,46.25% 34.53%,46.25% 35.94%,46.41% 37.34%,46.41% 38.75%,46.41% 40.16%,46.41% 41.56%,46.41% 42.97%,46.41% 44.38%,46.41% 45.78%,46.41% 47.19%,46.41% 48.59%,46.41% 50.00%,46.41% 51.41%,46.41% 52.81%,46.41% 54.22%,46.41% 55.62%,46.41% 57.03%,46.41% 58.44%,46.41% 59.84%,46.41% 61.25%,46.41% 62.66%,46.41% 64.06%,46.41% 65.47%,46.41% 66.88%,46.41% 68.28%,46.41% 69.69%,46.41% 71.09%,46.41% 72.50%,46.41% 73.91%,46.41% 75.31%,46.41% 76.72%,46.41% 78.12%,46.41% 79.53%,46.41% 80.94%,46.41% 82.34%,46.41% 83.75%,46.41% 85.16%,46.41% 86.56%,46.41% 87.34%,46.41% 87.66%,46.41% 87.97%,46.41% 88.28%,46.41% 88.59%,46.41% 88.91%,46.41% 89.22%,46.41% 89.53%,46.56% 89.84%,46.72% 90.00%,53.44% 90.00%,53.59% 89.84%,53.75% 89.53%,53.91% 89.22%,53.91% 88.91%,53.91% 88.59%,53.91% 88.28%,53.91% 87.97%,53.91% 87.66%,53.91% 87.34%,53.91% 86.56%,53.91% 85.16%,53.91% 83.75%,53.91% 82.34%,53.91% 80.94%,53.91% 79.53%,53.91% 78.12%,53.91% 76.72%,53.91% 75.31%,53.91% 73.91%,53.75% 72.50%,53.75% 71.09%,53.75% 69.69%,53.75% 68.28%,53.75% 66.88%,53.75% 65.47%,53.75% 64.06%,53.75% 62.66%,53.75% 61.25%,53.75% 59.84%,53.75% 58.44%,53.75% 57.03%,53.75% 55.62%,53.75% 54.22%,53.75% 52.81%,53.75% 51.41%,53.75% 50.00%,53.75% 48.59%,53.75% 47.19%,53.75% 45.78%,53.75% 44.38%,53.59% 42.97%,53.75% 41.56%,53.75% 40.16%,53.75% 38.75%,53.75% 37.34%,53.75% 35.94%,53.75% 34.53%,53.75% 33.12%,53.75% 31.72%,53.75% 30.31%,53.75% 28.91%,53.75% 27.50%,53.75% 26.09%,53.75% 24.69%,53.75% 23.28%,53.75% 21.88%,53.75% 20.47%,53.75% 19.06%,53.75% 17.66%,53.75% 16.25%,53.75% 14.84%,53.75% 13.44%,53.75% 12.03%,53.75% 10.62%,53.75% 10.31%,53.59% 10.00%,53.28% 9.69%,52.66% 9.38%)",
+        "transform": "scale(1.104) translate(0.00%,0.31%)",
+        "detailSrc": "/storefront/stationery/products/ystudio-classic-fountain-pen-brass-detail.webp"
+      }
+    ]
+  },
+  {
+    "id": "waterman-carene-sea-black",
+    "name": "Waterman Carène — Sea Black",
+    "group": "grandfathers-collection",
+    "type": "Fountain pens",
+    "description": "A black lacquer fountain pen with chrome trim and an inset nib.",
+    "mrp": 2250000,
+    "price": 2025000,
+    "source": "https://scooboo.in/products/waterman-carene-sea-black-ct-fountain-pen",
+    "image_source": "https://scooboo.in/cdn/shop/files/Waterman_Carene_Sea_Black_CT_Fountain_Pen-5.jpg?v=1764224512&width=640",
+    "rail": [
+      {
+        "src": "/storefront/stationery/products/waterman-carene-sea-black.webp",
+        "label": "Front",
+        "clip": "polygon(47.03% 8.91%,46.41% 9.22%,46.25% 9.53%,46.09% 9.84%,45.94% 10.16%,45.62% 11.56%,45.47% 12.97%,45.16% 14.38%,45.00% 15.78%,44.84% 17.19%,44.69% 18.59%,44.53% 20.00%,44.53% 21.41%,44.38% 22.81%,44.22% 24.22%,44.22% 25.62%,44.06% 27.03%,44.06% 28.44%,44.06% 29.84%,44.06% 31.25%,43.91% 32.66%,43.91% 34.06%,43.91% 35.47%,43.91% 36.88%,43.91% 38.28%,43.91% 39.69%,43.91% 41.09%,43.91% 42.50%,43.75% 43.91%,44.22% 45.31%,44.22% 46.72%,44.22% 48.12%,44.22% 49.53%,44.22% 50.94%,44.22% 52.34%,44.22% 53.75%,44.22% 55.16%,44.22% 56.56%,44.22% 57.97%,44.38% 59.38%,44.38% 60.78%,44.38% 62.19%,44.38% 63.59%,44.53% 65.00%,44.69% 66.41%,44.69% 67.81%,44.84% 69.22%,44.84% 70.62%,44.84% 72.03%,45.00% 73.44%,45.00% 74.84%,45.16% 76.25%,45.16% 77.66%,45.31% 79.06%,45.47% 80.47%,45.62% 81.88%,45.78% 83.28%,46.09% 84.69%,46.41% 86.09%,46.72% 87.34%,46.72% 87.66%,46.88% 87.97%,46.88% 88.28%,47.03% 88.59%,47.03% 88.91%,47.19% 89.22%,47.34% 89.53%,47.34% 89.84%,47.50% 90.00%,48.44% 90.00%,48.44% 89.84%,48.44% 89.53%,48.59% 89.22%,48.75% 88.91%,48.59% 88.59%,48.59% 88.28%,48.59% 87.97%,48.59% 87.66%,48.75% 87.34%,49.53% 86.09%,49.84% 84.69%,50.00% 83.28%,50.31% 81.88%,50.31% 80.47%,50.47% 79.06%,50.47% 77.66%,50.62% 76.25%,50.62% 74.84%,50.62% 73.44%,50.62% 72.03%,50.78% 70.62%,50.78% 69.22%,50.78% 67.81%,50.78% 66.41%,50.94% 65.00%,51.09% 63.59%,51.09% 62.19%,51.09% 60.78%,50.94% 59.38%,50.94% 57.97%,50.94% 56.56%,50.94% 55.16%,50.94% 53.75%,50.94% 52.34%,50.94% 50.94%,50.94% 49.53%,50.94% 48.12%,50.94% 46.72%,50.94% 45.31%,51.41% 43.91%,51.25% 42.50%,51.25% 41.09%,51.25% 39.69%,51.25% 38.28%,51.25% 36.88%,51.25% 35.47%,51.25% 34.06%,51.09% 32.66%,51.09% 31.25%,51.09% 29.84%,50.94% 28.44%,50.94% 27.03%,50.78% 25.62%,50.78% 24.22%,50.62% 22.81%,50.62% 21.41%,50.47% 20.00%,50.31% 18.59%,50.16% 17.19%,50.00% 15.78%,49.84% 14.38%,49.69% 12.97%,49.38% 11.56%,49.06% 10.16%,49.06% 9.84%,48.91% 9.53%,48.59% 9.22%,47.81% 8.91%)",
+        "transform": "scale(1.097) translate(2.50%,0.55%)",
+        "detailSrc": "/storefront/stationery/products/waterman-carene-sea-black-detail.webp"
+      },
+      {
+        "src": "/storefront/stationery/products/waterman-carene-sea-black-view-1.webp",
+        "label": "Capped",
+        "clip": "polygon(48.44% 3.23%,47.97% 5.62%,47.50% 8.02%,47.19% 10.41%,47.03% 12.81%,46.87% 15.20%,46.56% 17.60%,46.56% 19.99%,46.41% 22.38%,46.25% 24.78%,46.25% 27.17%,46.25% 29.57%,46.09% 31.96%,46.09% 34.36%,46.09% 36.75%,46.09% 39.15%,45.94% 41.54%,45.94% 43.94%,46.25% 46.33%,46.25% 48.72%,46.25% 51.12%,46.25% 53.51%,46.25% 55.91%,46.41% 58.30%,46.41% 60.70%,46.41% 63.09%,46.41% 65.49%,46.41% 67.88%,46.56% 70.28%,46.56% 72.67%,46.72% 75.06%,46.72% 77.46%,46.87% 79.85%,46.88% 82.25%,47.03% 84.64%,47.19% 87.04%,47.19% 89.43%,47.34% 91.83%,47.34% 94.22%,47.66% 96.62%,52.66% 96.62%,53.13% 94.22%,53.28% 91.83%,53.28% 89.43%,53.44% 87.04%,53.44% 84.64%,53.44% 82.25%,53.59% 79.85%,53.59% 77.46%,53.75% 75.06%,53.75% 72.67%,53.91% 70.28%,53.91% 67.88%,53.91% 65.49%,54.06% 63.09%,54.06% 60.70%,54.06% 58.30%,54.06% 55.91%,54.06% 53.51%,54.06% 51.12%,54.22% 48.72%,54.22% 46.33%,54.53% 43.94%,54.53% 41.54%,54.53% 39.15%,54.53% 36.75%,54.38% 34.36%,54.38% 31.96%,54.37% 29.57%,54.22% 27.17%,54.22% 24.78%,54.06% 22.38%,54.06% 19.99%,53.91% 17.60%,53.75% 15.20%,53.44% 12.81%,53.28% 10.41%,52.97% 8.02%,52.66% 5.62%,52.19% 3.23%)",
+        "transform": "rotate(0.00deg) scale(0.929) translate(-0.23%,0.08%)",
+        "detailSrc": "/storefront/stationery/products/waterman-carene-sea-black-view-1-detail.webp"
+      }
+    ]
+  },
+  {
+    "id": "pelikan-m800-green-demonstrator",
+    "name": "Pelikan Souverän M800 Green Demonstrator",
+    "group": "grandfathers-collection",
+    "type": "Fountain pens",
+    "description": "A special edition translucent green piston fountain pen with gold trim and an 18k gold nib.",
+    "mrp": 10200000,
+    "price": 9180000,
+    "source": "https://scooboo.in/products/pelikan-special-edition-souveran-m800-green-demostrator-fountain-pen",
+    "image_source": "https://luxe.scooboo.in/cdn/shop/files/PEP_SVRN_M800_GRN_DEMO_FPEF_821438_488c4bc7-245a-4e02-b58a-0cba32096779.jpg?v=1777286605&width=640",
+    "rail": [
+      {
+        "src": "/storefront/stationery/products/pelikan-m800-green-demonstrator.webp",
+        "label": "Front",
+        "clip": "polygon(48.59% 2.03%,46.25% 4.69%,45.94% 7.34%,45.78% 10.00%,45.78% 12.66%,45.78% 15.31%,45.62% 17.97%,45.62% 20.62%,45.62% 23.28%,45.62% 25.94%,45.47% 28.59%,45.47% 31.25%,45.47% 33.91%,45.47% 36.56%,45.47% 39.22%,45.94% 41.88%,45.94% 44.53%,45.94% 47.19%,45.94% 49.84%,45.94% 52.50%,45.78% 55.16%,45.78% 57.81%,45.94% 60.47%,45.94% 63.12%,45.94% 65.78%,45.94% 68.44%,46.09% 71.09%,46.25% 73.75%,46.41% 76.41%,46.56% 79.06%,46.72% 81.72%,46.41% 84.38%,47.66% 87.03%,47.50% 89.69%,47.19% 92.34%,48.59% 95.00%,49.53% 97.66%,49.53% 97.97%,50.31% 97.97%,50.31% 97.66%,51.25% 95.00%,52.50% 92.34%,52.34% 89.69%,52.03% 87.03%,53.44% 84.38%,53.12% 81.72%,53.28% 79.06%,53.44% 76.41%,53.59% 73.75%,53.75% 71.09%,53.91% 68.44%,53.91% 65.78%,53.91% 63.12%,53.91% 60.47%,54.06% 57.81%,54.06% 55.16%,54.06% 52.50%,54.06% 49.84%,54.06% 47.19%,53.91% 44.53%,53.91% 41.88%,54.38% 39.22%,54.38% 36.56%,54.38% 33.91%,54.38% 31.25%,54.38% 28.59%,54.22% 25.94%,54.22% 23.28%,54.22% 20.62%,54.22% 17.97%,54.06% 15.31%,54.06% 12.66%,54.06% 10.00%,53.91% 7.34%,53.59% 4.69%,51.25% 2.03%)",
+        "transform": "scale(0.928) translate(0.08%,0.00%)",
+        "detailSrc": "/storefront/stationery/products/pelikan-m800-green-demonstrator-detail.webp"
+      },
+      {
+        "src": "/storefront/stationery/products/pelikan-m800-green-demonstrator-view-1.webp",
+        "label": "Reverse",
+        "clip": "polygon(48.12% 1.72%,45.31% 4.22%,45.31% 6.72%,45.16% 9.22%,45.16% 11.72%,45.16% 14.22%,45.16% 16.72%,44.69% 19.22%,44.69% 21.72%,44.69% 24.22%,44.69% 26.72%,44.53% 29.22%,44.53% 31.72%,44.53% 34.22%,44.53% 36.72%,44.53% 39.22%,44.53% 41.72%,44.53% 44.22%,44.53% 46.72%,44.69% 49.22%,44.69% 51.72%,44.69% 54.22%,44.69% 56.72%,44.84% 59.22%,44.84% 61.72%,44.84% 64.22%,45.00% 66.72%,45.47% 69.22%,45.62% 71.72%,45.62% 74.22%,45.78% 76.72%,45.47% 79.22%,47.19% 81.72%,46.88% 84.22%,46.72% 86.72%,46.56% 89.22%,47.50% 91.72%,48.59% 94.22%,49.53% 96.72%,49.69% 96.88%,50.31% 96.88%,50.47% 96.72%,51.09% 94.22%,52.34% 91.72%,53.12% 89.22%,52.97% 86.72%,52.66% 84.22%,52.50% 81.72%,54.38% 79.22%,53.91% 76.72%,54.06% 74.22%,54.06% 71.72%,54.22% 69.22%,54.69% 66.72%,54.69% 64.22%,54.69% 61.72%,54.69% 59.22%,54.84% 56.72%,54.84% 54.22%,54.84% 51.72%,54.84% 49.22%,54.84% 46.72%,54.84% 44.22%,54.84% 41.72%,54.84% 39.22%,54.84% 36.72%,54.84% 34.22%,54.84% 31.72%,54.84% 29.22%,54.69% 26.72%,54.69% 24.22%,54.69% 21.72%,54.53% 19.22%,54.22% 16.72%,54.22% 14.22%,54.06% 11.72%,54.06% 9.22%,53.91% 6.72%,53.91% 4.22%,51.09% 1.72%)",
+        "transform": "scale(0.935) translate(0.31%,0.70%)",
+        "detailSrc": "/storefront/stationery/products/pelikan-m800-green-demonstrator-view-1-detail.webp"
+      }
+    ]
+  },
+  {
+    "id": "pelikan-classic-m205-white-fountain-pen",
+    "group": "grandfathers-collection",
+    "type": "Fountain pens",
+    "name": "Pelikan Classic M205 Fountain Pen — White",
+    "description": "A lightweight resin fountain pen with polished trim and an ink window to check the remaining ink.",
+    "source": "https://scooboo.in/products/pelikan-classic-m205-white-fountain-pen",
+    "image_source": "https://scooboo.in/cdn/shop/files/White_Pelikan_Classic_M205_Fountain_Pen.jpg?v=1764820748&width=640",
+    "mrp": 1610000,
+    "price": 1449000,
+    "rail": [
+      {
+        "src": "/storefront/stationery/products/pelikan-classic-m205-white-fountain-pen.webp",
+        "label": "Front",
+        "clip": "polygon(47.66% 10.47%,46.56% 10.78%,46.25% 11.09%,45.78% 11.41%,45.78% 11.72%,45.78% 13.12%,45.47% 14.53%,45.47% 15.94%,45.47% 17.34%,45.47% 18.75%,45.31% 20.16%,45.31% 21.56%,45.31% 22.97%,45.31% 24.38%,45.16% 25.78%,45.16% 27.19%,45.16% 28.59%,45.16% 30.00%,45.16% 31.41%,45.16% 32.81%,45.16% 34.22%,45.16% 35.62%,45.16% 37.03%,45.00% 38.44%,45.00% 39.84%,45.16% 41.25%,45.47% 42.66%,45.47% 44.06%,45.47% 45.47%,45.47% 46.88%,45.47% 48.28%,45.47% 49.69%,45.47% 51.09%,45.47% 52.50%,45.47% 53.91%,45.47% 55.31%,45.47% 56.72%,45.47% 58.12%,45.47% 59.53%,45.47% 60.94%,45.47% 62.34%,45.62% 63.75%,45.47% 65.16%,45.47% 66.56%,45.47% 67.97%,45.47% 69.38%,45.78% 70.78%,46.09% 72.19%,45.94% 73.59%,46.09% 75.00%,46.09% 76.41%,46.09% 77.81%,46.09% 79.22%,47.03% 80.62%,47.03% 82.03%,46.88% 83.44%,46.72% 84.84%,46.72% 86.25%,47.19% 87.34%,47.34% 87.66%,47.50% 87.97%,47.66% 88.28%,47.66% 88.59%,47.81% 88.91%,47.97% 89.22%,48.12% 89.53%,48.12% 89.84%,48.28% 90.00%,48.75% 90.00%,48.75% 89.84%,48.91% 89.53%,48.91% 89.22%,49.06% 88.91%,49.22% 88.59%,49.38% 88.28%,49.53% 87.97%,49.69% 87.66%,49.84% 87.34%,50.31% 86.25%,50.31% 84.84%,50.16% 83.44%,50.16% 82.03%,50.00% 80.62%,51.09% 79.22%,51.09% 77.81%,51.09% 76.41%,51.09% 75.00%,51.25% 73.59%,51.25% 72.19%,51.41% 70.78%,51.56% 69.38%,51.72% 67.97%,51.72% 66.56%,51.72% 65.16%,51.72% 63.75%,51.72% 62.34%,51.72% 60.94%,51.72% 59.53%,51.72% 58.12%,51.72% 56.72%,51.72% 55.31%,51.72% 53.91%,51.72% 52.50%,51.72% 51.09%,51.72% 49.69%,51.72% 48.28%,51.72% 46.88%,51.72% 45.47%,51.72% 44.06%,51.72% 42.66%,52.19% 41.25%,52.34% 39.84%,52.19% 38.44%,52.19% 37.03%,52.19% 35.62%,52.19% 34.22%,52.03% 32.81%,52.03% 31.41%,52.03% 30.00%,52.03% 28.59%,52.03% 27.19%,52.03% 25.78%,52.03% 24.38%,52.03% 22.97%,51.88% 21.56%,51.88% 20.16%,51.88% 18.75%,51.88% 17.34%,51.88% 15.94%,51.88% 14.53%,51.56% 13.12%,51.56% 11.72%,51.09% 11.41%,51.09% 11.09%,50.78% 10.78%,49.84% 10.47%)",
+        "transform": "scale(1.119) translate(1.41%,-0.23%)",
+        "detailSrc": "/storefront/stationery/products/pelikan-classic-m205-white-fountain-pen-detail.webp"
+      }
+    ]
+  },
+  {
+    "id": "platinum-fountain-pen",
+    "group": "grandfathers-collection",
+    "type": "Fountain pens",
+    "name": "Platinum Fountain Pen — Violet",
+    "description": "A lightweight aluminium fountain pen with a stainless steel nib for everyday writing.",
+    "source": "https://scooboo.in/products/platinum-fountain-pen",
+    "image_source": "https://scooboo.in/cdn/shop/files/Violet_Platinum_Fountain_Pen.jpg?v=1766984182&width=640",
+    "mrp": 155000,
+    "price": 124000,
+    "rail": [
+      {
+        "src": "/storefront/stationery/products/platinum-fountain-pen.webp",
+        "label": "Front",
+        "clip": "polygon(48.91% 9.22%,47.81% 9.53%,47.50% 9.84%,47.03% 10.16%,46.88% 10.47%,46.25% 11.88%,46.09% 13.28%,45.94% 14.69%,45.78% 16.09%,45.62% 17.50%,45.62% 18.91%,45.62% 20.31%,45.62% 21.72%,45.62% 23.12%,45.62% 24.53%,45.47% 25.94%,45.47% 27.34%,45.47% 28.75%,45.47% 30.16%,45.47% 31.56%,45.47% 32.97%,45.47% 34.38%,45.47% 35.78%,45.47% 37.19%,45.47% 38.59%,45.47% 40.00%,45.16% 41.41%,45.16% 42.81%,45.16% 44.22%,45.16% 45.62%,45.47% 47.03%,45.94% 48.44%,45.94% 49.84%,45.94% 51.25%,45.94% 52.66%,45.94% 54.06%,45.94% 55.47%,45.94% 56.88%,46.09% 58.28%,46.09% 59.69%,46.09% 61.09%,46.09% 62.50%,46.09% 63.91%,46.09% 65.31%,46.25% 66.72%,46.25% 68.12%,46.25% 69.53%,46.25% 70.94%,46.25% 72.34%,46.41% 73.75%,46.41% 75.16%,46.41% 76.56%,46.41% 77.97%,46.41% 79.38%,46.41% 80.78%,46.41% 82.19%,46.56% 83.59%,46.72% 85.00%,46.88% 86.41%,46.88% 87.34%,46.88% 87.66%,47.03% 87.97%,47.03% 88.28%,47.19% 88.59%,47.19% 88.91%,47.34% 89.22%,47.50% 89.53%,47.66% 89.84%,47.81% 90.00%,51.25% 90.00%,51.41% 89.84%,51.72% 89.53%,51.88% 89.22%,51.88% 88.91%,52.03% 88.59%,52.03% 88.28%,52.03% 87.97%,52.19% 87.66%,52.19% 87.34%,52.34% 86.41%,52.50% 85.00%,52.66% 83.59%,52.66% 82.19%,52.66% 80.78%,52.66% 79.38%,52.66% 77.97%,52.66% 76.56%,52.66% 75.16%,52.66% 73.75%,52.66% 72.34%,52.66% 70.94%,52.81% 69.53%,52.81% 68.12%,52.81% 66.72%,52.81% 65.31%,52.81% 63.91%,52.81% 62.50%,52.81% 61.09%,52.81% 59.69%,52.81% 58.28%,52.81% 56.88%,52.81% 55.47%,52.81% 54.06%,52.81% 52.66%,52.81% 51.25%,52.97% 49.84%,52.97% 48.44%,53.44% 47.03%,53.75% 45.62%,53.75% 44.22%,53.59% 42.81%,53.75% 41.41%,53.44% 40.00%,53.44% 38.59%,53.44% 37.19%,53.44% 35.78%,53.44% 34.38%,53.44% 32.97%,53.44% 31.56%,53.44% 30.16%,53.28% 28.75%,53.28% 27.34%,53.28% 25.94%,53.28% 24.53%,53.28% 23.12%,53.28% 21.72%,53.28% 20.31%,53.28% 18.91%,53.12% 17.50%,52.97% 16.09%,52.81% 14.69%,52.66% 13.28%,52.50% 11.88%,51.88% 10.47%,51.72% 10.16%,51.41% 9.84%,50.94% 9.53%,49.84% 9.22%)",
+        "transform": "scale(1.102) translate(0.70%,0.39%)",
+        "detailSrc": "/storefront/stationery/products/platinum-fountain-pen-detail.webp"
+      }
+    ]
+  }
+]

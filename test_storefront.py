@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import sqlite3
 import subprocess
 from tempfile import TemporaryDirectory
 from threading import Thread
@@ -69,6 +70,49 @@ def run(port, server, storefront, root, run_browser):
             assert result.status in (code if isinstance(code, tuple) else (code,)), (path, result.status, code)
             return result.read().decode()
 
+    def unexpected_inventory():
+        raise AssertionError('Stationery accessed ERP inventory')
+
+    def settings_only():
+        connection = sqlite3.connect(':memory:')
+        connection.execute('CREATE TABLE settings (id INTEGER)')
+        return connection
+
+    stationery = storefront.stationery
+    home = request(stationery.STATIONERY)
+    art_home = request('/shop')
+    assert home.count('data-stationery-object=') == len(stationery.GROUPS)
+    assert all(storefront.privilege_strip() not in page for page in (art_home, home))
+    assert all(storefront.BRAND_LOGO in page and 'Gupta Art and Stationery, home' in page for page in (art_home, home))
+    assert home.index('Featured premium pens') < home.index('Premium pen brands') < home.index('Featured stationery discounts')
+    assert 'stationery-pendant' in home and 'data-category-navigation' in home
+    assert 'Explore Collection' not in home and 'href="/shop/stationery"' in art_home
+    found = json.loads(request(stationery.SEARCH + '?q=kangaro+hd'))['products']
+    assert len(found) == 1 and 'HD-10D' in found[0]['name']
+    detail_html = request(found[0]['url'])
+    assert found[0]['image'] in detail_html and 'Product reference and photo' not in detail_html
+    assert 'data-stationery-product-back href="/shop/stationery/office-tools#stationery-products"' in detail_html
+    stationery_id = 'stationery:' + found[0]['id']
+    status, _, body = storefront.storefront_response(
+        '/api/storefront/products', urlencode({'ids': stationery_id}), unexpected_inventory, base)
+    assert status == 200
+    saved_stationery, = json.loads(body)['products']
+    assert saved_stationery['id'] == stationery_id and saved_stationery['demo_stationery']
+    assert saved_stationery['image'] == found[0]['image'] and saved_stationery['price'] < saved_stationery['mrp']
+    assert not json.loads(request(stationery.SEARCH + '?q=watercolor'))['products']
+    filters = request(stationery.group_url('office-tools') + '?type=Staplers')
+    assert 'Kangaro HD-10D' in filters and 'Sun Star Mini Portable Scissors' not in filters
+    for key in stationery.GROUPS:
+        path = stationery.group_url(key)
+        status, _, body = storefront.storefront_response(path, '', settings_only, base)
+        assert status == 200
+        expected = [p for p in stationery.catalogue() if p['group'] == key]
+        assert expected and body.count(b'class="stationery-product"') == len(expected)
+        assert (b'data-pen-gallery' in body) == (key in stationery.FEATURED)
+    for item in stationery.catalogue():
+        status, _, body = storefront.storefront_response(stationery.product_image(item), '', unexpected_inventory, base)
+        assert status == 200 and body.startswith(b'RIFF') and body[8:12] == b'WEBP'
+
     request('/api/setup', {'email':'storefront-test@example.test', 'password':'isolated-fixture-password'}, opener=owner)
     first = {'name':'QA Studio Palette', 'sku':'QA-PALETTE', 'category':'Accessories', 'price':123.45,
              'cost':7.61, 'stock':8, 'published':False, 'description':'Disposable test fixture.',
@@ -85,6 +129,8 @@ def run(port, server, storefront, root, run_browser):
     products = json.loads(request('/api/storefront/products?ids=' + ids))['products']
     assert {p['id'] for p in products} == set(id_of.values()) - {id_of['QA-ARCHIVE']}
     selected = next(p for p in products if p['id'] == id_of['QA-PALETTE'])
+    mixed = json.loads(request('/api/storefront/products?' + urlencode({'ids': selected['id'] + ',' + stationery_id})))
+    assert mixed['products'] == [selected, saved_stationery]
     twin = next(p for p in products if p['id'] == id_of['QA-EMPTY'])
     assert selected['url'] != twin['url'] and selected['image'] != twin['image']
     assert not {'cost','reorder','published','archived'} & set(selected)
@@ -134,11 +180,11 @@ def run(port, server, storefront, root, run_browser):
     request('/api/storefront-settings', announcement, code=401)
     request('/api/storefront-settings', {**announcement, 'link':'javascript:alert(1)'}, code=400, opener=owner)
     request('/api/storefront-settings', {**announcement, 'start':'2999-01-01'}, opener=owner)
-    assert 'Test studio notice' not in request('/shop')
+    assert all('Test studio notice' not in request(path) for path in ('/shop', stationery.STATIONERY))
     request('/api/storefront-settings', announcement, opener=owner)
-    assert 'Test studio notice &lt;test&gt;' in request('/shop')
+    assert all('Test studio notice &lt;test&gt;' in request(path) for path in ('/shop', stationery.STATIONERY, found[0]['url']))
     request('/api/storefront-settings', {**announcement, 'active':False}, opener=owner)
-    assert 'Test studio notice' not in request('/shop')
+    assert all('Test studio notice' not in request(path) for path in ('/shop', stationery.STATIONERY))
 
     os.environ['GUPTHA_PUBLIC_ORIGIN'] = 'https://store.example.test'
 
@@ -165,6 +211,7 @@ def run(port, server, storefront, root, run_browser):
 
     os.environ['GUPTHA_DEMO_CHECKOUT_DB'] = str(root / 'checkout.sqlite3')
     os.environ['GUPTHA_ACCOUNTS_DB'] = str(root / 'accounts.sqlite3')
+    assert all(storefront.privilege_strip() in request(path) for path in ('/shop', stationery.STATIONERY))
     shopper = build_opener(HTTPCookieProcessor(CookieJar()))
     credentials = urlencode({'name':'Demo Customer','email':'demo-account@example.test',
                              'password':'isolated-shopper-password'}).encode()

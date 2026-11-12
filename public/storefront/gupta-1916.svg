@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#FFFFFF"/>
+  <!-- Blue open-square emblem -->
+  <path d="M 930 150
+           H 430
+           C 265 150 170 250 170 410
+           V 755
+           C 170 920 265 1010 430 1010
+           H 900
+           C 940 1010 955 990 955 955
+           C 955 900 925 865 875 865
+           H 435
+           C 365 865 330 830 330 760
+           V 420
+           C 330 350 365 315 435 315
+           H 930 Z" fill="#0757A6"/>
+  <!-- Right inner upright blue segment -->
+  <path d="M 790 470 H 865 C 915 470 930 495 930 540 V 675
+           C 890 645 845 620 790 600 Z" fill="#0757A6"/>
+  <!-- Green flowing S ribbon -->
+  <path d="M 440 330
+           C 420 400 465 465 555 515
+           C 645 565 760 600 845 655
+           C 925 705 950 770 915 855
+           C 895 900 875 930 860 950
+           C 875 875 835 825 760 785
+           C 675 740 560 705 475 650
+           C 385 590 350 505 385 420
+           C 400 380 420 350 440 330 Z" fill="#91C83E"/>
+  <!-- Year -->
+  <g fill="#55585C" font-family="Arial, Helvetica, sans-serif" font-weight="500" font-size="150" text-anchor="middle">
+    <text x="300" y="1130">1</text>
+    <text x="500" y="1130">9</text>
+    <text x="700" y="1130">1</text>
+    <text x="900" y="1130">6</text>
+  </g>
+</svg>

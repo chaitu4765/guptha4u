@@ -35,17 +35,26 @@
 .studio-object-art { display: none; }
 .studio-object-label { position: relative; z-index: 1; padding: 8px 3px; font-size: clamp(10px, 1vw, 16px); font-weight: 800; line-height: 1.16; min-height: 36px; max-width: 100%; text-shadow: 0 1px 5px #fff6e8, 0 0 11px #fff5e6; }
 .studio-object::after {
-  content: ""; position: absolute; left: 50%; top: var(--plinth-floor, 83.6%);
-  width: var(--plinth-width, 96%); height: 7%; min-height: 11px; translate: -50% -50%;
-  border: 2px solid #fffbd0; border-radius: 50%;
-  box-shadow: 0 0 5px 1px #fff1a8, 0 0 12px 3px #ffd338, 0 0 19px 4px #ffad2780, inset 0 0 5px #ffd338;
-  pointer-events: none; opacity: 0; scale: .95; transition: opacity .42s var(--ease), scale .5s var(--ease);
+  content: ""; position: absolute; left: var(--plinth-x); top: var(--plinth-floor);
+  width: var(--plinth-width); height: var(--plinth-depth); translate: -50% 0;
+  border: 2px solid #fffbd0; border-top: 0; border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  filter: drop-shadow(0 0 2px #fff1a8) drop-shadow(0 1px 4px #ffd338) drop-shadow(0 2px 8px #ffae27);
+  pointer-events: none; opacity: 0; transition: opacity .42s var(--ease), scale .56s var(--ease);
 }
-.studio-object:is(:hover, :focus-visible)::after { opacity: 1; scale: 1; }
-.studio-object[data-key="paints"], .studio-object[data-key="brands"] { --plinth-width: 103%; --plinth-floor: 84.1%; }
-.studio-object[data-key="brushes"], .studio-object[data-key="drawing"] { --plinth-width: 90%; }
-.studio-object[data-key="canvas"], .studio-object[data-key="papers"] { --plinth-width: 94%; }
-.studio-object[data-key="accessories"] { --plinth-width: 103%; }
+.studio-object:focus-visible::after { opacity: 1; }
+@media (hover: hover) { .studio-object:hover::after { opacity: 1; } }
+@media (min-width: 1001px) and (prefers-reduced-motion: no-preference) {
+  .studio-stage:has(.studio-lifts.is-ready) .studio-object:is(:hover, :focus-visible)::after { scale: 1.06 1; }
+}
+/* Align to the front edges in the studio panorama and its square card crops. */
+.studio-object[data-key="paints"] { --plinth-x: 50%; --plinth-width: 102%; --plinth-floor: 80.4%; --plinth-depth: 5.7%; --tile-plinth-width: 99%; }
+.studio-object[data-key="brushes"] { --plinth-x: 50.7%; --plinth-width: 84.8%; --plinth-floor: 81.9%; --plinth-depth: 4.8%; --tile-plinth-width: 90%; }
+.studio-object[data-key="canvas"] { --plinth-x: 50.6%; --plinth-width: 91.7%; --plinth-floor: 80.8%; --plinth-depth: 5%; --tile-plinth-width: 96%; }
+.studio-object[data-key="easels"] { --plinth-x: 50.4%; --plinth-width: 94.8%; --plinth-floor: 80.6%; --plinth-depth: 5.2%; --tile-plinth-width: 95%; }
+.studio-object[data-key="drawing"] { --plinth-x: 49.3%; --plinth-width: 88.2%; --plinth-floor: 81.3%; --plinth-depth: 4.8%; --tile-plinth-width: 95%; }
+.studio-object[data-key="papers"] { --plinth-x: 49.6%; --plinth-width: 93.2%; --plinth-floor: 80.6%; --plinth-depth: 5.4%; --tile-plinth-width: 97%; }
+.studio-object[data-key="accessories"] { --plinth-x: 50.7%; --plinth-width: 100.9%; --plinth-floor: 80.6%; --plinth-depth: 5.7%; --tile-plinth-width: 97%; }
+.studio-object[data-key="brands"] { --plinth-x: 51.1%; --plinth-width: 101.7%; --plinth-floor: 80.6%; --plinth-depth: 5.2%; --tile-plinth-width: 93%; }
 .studio-object:focus-visible { outline-offset: -3px; border-radius: 8px; }
 [data-key="paints"], #studio[data-category="paints"] { --shelf-x: 8.8%; --focus-x: 8.8%; --wash-mid: 56%; }
 [data-key="brushes"], #studio[data-category="brushes"] { --shelf-x: 20.7%; --focus-x: 20.7%; }
@@ -105,9 +114,9 @@
   .studio-objects { position: relative; inset: auto; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); width: calc(100% - 32px); margin: 24px auto 0; gap: 12px; }
   .studio-object { position: relative; left: auto; width: 100%; translate: none; display: block; background: #fff8ed; border-radius: 12px; overflow: hidden; }
   .studio-object-art { display: block; aspect-ratio: 1 / 1; }
-  .studio-object-art img { width: 100%; height: 100%; object-fit: cover; object-position: center 72%; }
+  .studio-object-art img { width: 100%; height: 100%; object-fit: cover; object-position: center bottom; }
   .studio-object-label { display: block; padding: 10px 4px; min-height: 48px; font-size: 12px; }
-  .studio-object::after { top: auto; bottom: 56px; width: 85%; height: 5%; translate: -50% 0; }
+  .studio-object::after { top: 0; left: 50%; margin-top: 86%; width: var(--tile-plinth-width); height: auto; aspect-ratio: 13; }
   .studio-hint { position: static; margin-top: 16px; padding: 0 16px; }
   #studio:not([data-category=""]) .studio-copy { max-width: 80%; padding: 92px var(--gutter) 20px; }
   #studio:not([data-category=""]) .studio-render { display: block; width: min(65%, 310px); margin: 0 auto; }

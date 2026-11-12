@@ -16,6 +16,7 @@
       stage.style.setProperty('--focus-x', style.getPropertyValue('--focus-x'));
       stage.style.setProperty('--destination', style.getPropertyValue('--destination') || '73%');
     }
+    const skeleton = setTimeout(() => showProductSkeleton(studio.querySelector('.studio-content')), 140);
     try {
       const response = await fetch(url, { signal: controller.signal });
       if (!response.ok) throw new Error('Category unavailable');
@@ -70,6 +71,7 @@
     } catch (error) {
       if (error.name !== 'AbortError') location.assign(url);
     } finally {
+      clearTimeout(skeleton);
       if (pending === controller) finishZoom();
     }
   }

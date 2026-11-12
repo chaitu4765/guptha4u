@@ -17,12 +17,14 @@ from storefront_checkout import (BODY_LIMIT, CHECKOUT_API, POST_PATHS, demo_enab
                                  DELIVERY_FEE, MEMBER_PERCENT, MEMBER_PRICE, QUALIFYING_SPEND, customer_orders)
 from storefront_hosted import HOSTED_DEMO, DATABASE_ERRORS, apply_hosted_stock
 import storefront_accounts as accounts
+import storefront_stationery as stationery
 
 ROOT = Path(__file__).resolve().parent
 CATALOGUE_PREVIEW = os.environ.get('GUPTHA_CATALOGUE_PREVIEW') == '1'
 ASSETS = ROOT / 'public' / 'storefront'
 MEDIA = Path(os.environ.get('GUPTHA_MEDIA', ASSETS / 'media')).resolve()
-BRAND = 'Gupta Art Store and Stationary'
+BRAND = 'Gupta Art and Stationery'
+BRAND_LOGO = '/storefront/gupta-1916.svg'
 SHOP = '/shop'
 PLACEHOLDER = '/storefront/placeholder.svg'
 PAGE_SIZE = 12
@@ -264,8 +266,23 @@ def layout(title, description, path, content, origin, notice='', noindex=False, 
     if structured:
         markup = '<script type="application/ld+json">' + json.dumps(structured).replace('<', r'\u003c') + '</script>'
     robots = '<meta name="robots" content="noindex,follow">' if noindex or CATALOGUE_PREVIEW or HOSTED_DEMO else ''
-    navigation = nav_links(products, True)
+    stationery_page = path == stationery.STATIONERY or path.startswith(stationery.STATIONERY + '/')
+    stationery_link = f'<a href="{stationery.STATIONERY}">Stationery</a>'
+    categories = (stationery.nav_links(path) if stationery_page else
+                  '<a href="/shop/catalogue">All materials</a>' + nav_links(products, True))
+    current = ' aria-current="true"'
+    navigation = (f'<nav class="stationery-nav" aria-label="Store departments">'
+                  f'<a href="{SHOP}" data-department-switch="art"{current if not stationery_page else ""}>Art Store</a>'
+                  f'<a href="{stationery.STATIONERY}" data-department-switch="stationery"{current if stationery_page else ""}>Stationery</a></nav>')
+    mobile_navigation = f'''<details class="mobile-nav"><summary aria-label="Browse categories">{icon('menu')}</summary>
+    <nav aria-label="Mobile categories">{categories}</nav>
+  </details>'''
+    search_path = stationery.STATIONERY + '/catalogue' if stationery_page else SHOP + '/catalogue'
+    search_label = 'Search stationery' if stationery_page else 'Search materials'
     member_link = '<a href="/shop/privilege">Privilege membership</a>' if demo else ''
+    wordmark = (f'<a href="{SHOP}" class="wordmark" aria-label="{BRAND}, home">'
+                f'<img class="wordmark-logo" src="{BRAND_LOGO}" alt="" width="54" height="54">'
+                '<div><span>Gupta</span><small>Art and Stationery</small></div></a>')
     return f'''<!doctype html>
 <html lang="en" data-type="product">
 <head>
@@ -278,29 +295,54 @@ def layout(title, description, path, content, origin, notice='', noindex=False, 
 <meta name="description" content="{escape(description)}">
 <link rel="canonical" href="{canonical}">
 {robots}
-<link rel="icon" href="/storefront/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="{BRAND_LOGO}" type="image/svg+xml">
 <link rel="stylesheet" href="/storefront/store.css">
 <link rel="stylesheet" href="/storefront/studio.css">
 <link rel="stylesheet" href="/storefront/polish.css">
 <link rel="stylesheet" href="/storefront/updates.css">
+<link rel="stylesheet" href="/storefront/stationery/stationery.css">
+{'<script defer src="/storefront/stationery/stationery.js"></script>' if stationery_page else ''}
 {'<link rel="stylesheet" href="/storefront/account.css">' if path in ('/shop/account', '/shop/sign-in', '/shop/sign-up') else ''}
 {'<link rel="stylesheet" href="/storefront/checkout.css">' if demo else ''}
+{'<link rel="stylesheet" href="/storefront/cart.css">' if path == SHOP + '/cart' else ''}
 <script defer src="/storefront/store.js"></script>
 <script type="module" src="/storefront/vendor/storefront.js"></script>
 {markup}
 </head>
-<body{' data-catalogue-preview' if CATALOGUE_PREVIEW else ''}>
+<body data-department="{'stationery' if stationery_page else 'art'}"{' data-catalogue-preview' if CATALOGUE_PREVIEW else ''}>
+<div class="studio-loading" data-studio-loading hidden>
+  <svg class="loader-logo" viewBox="0 0 1200 1200" aria-hidden="true">
+    <defs><mask id="gupta-paint-mask">
+      <path data-logo-stroke pathLength="1" d="M930 232H430C310 232 250 300 250 412V755C250 875 310 937 430 937H914" stroke-width="178"/>
+      <path data-logo-stroke pathLength="1" d="M860 475V660" stroke-width="156"/>
+      <path data-logo-stroke pathLength="1" d="M425 378C407 489 510 565 680 639S918 758 866 919" stroke-width="176"/>
+      <rect class="loader-logo-finish" width="1200" height="1200" fill="#fff"/>
+    </mask></defs>
+    <image href="{BRAND_LOGO}" width="1200" height="1200" mask="url(#gupta-paint-mask)"/>
+    <g class="loader-paintbrush">
+      <svg x="-205" y="-400" width="410" height="410" viewBox="0 0 384 384">
+        <image href="/storefront/motion-tools.webp" width="768" height="768"/>
+      </svg>
+    </g>
+  </svg>
+  <span class="art-loader" aria-hidden="true"></span>
+  <svg class="stationery-loader" viewBox="0 0 64 64" aria-hidden="true"><path d="M10 54 18 30 39 9l16 16-21 21-24 8Zm0 0 20-20m-4-4a4 4 0 1 0 8 0 4 4 0 0 0-8 0Z"/></svg>
+  <div class="department-morph" aria-hidden="true"><canvas width="192" height="192"></canvas><canvas width="192" height="192"></canvas></div>
+  <p class="department-hook" aria-hidden="true"></p>
+  <p role="status">Opening Gupta…</p>
+</div>
+<script src="/storefront/loading-start.js"></script>
+<template id="product-skeleton"><div class="product-skeleton" role="status"><span class="sr-only">Loading products…</span>
+  <div aria-hidden="true"><i></i><i></i><i></i><i></i></div></div></template>
 <a class="skip" href="#main">Skip to content</a>
-<header class="site-header">
+<header class="site-header department-header{' stationery-header' if stationery_page else ''}">
 <div class="wrap mast">
-  <details class="mobile-nav"><summary aria-label="Browse categories">{icon('menu')}</summary>
-    <nav aria-label="Mobile categories"><a href="/shop/catalogue">All materials</a>{navigation}</nav>
-  </details>
-  <a href="/shop" class="wordmark" aria-label="{BRAND}, home"><span>Gupta</span><small>Art Store and Stationary</small></a>
-  <nav class="category-nav" data-category-navigation aria-label="Shop categories">{navigation}</nav>
-  <form class="global-search" role="search" action="/shop/catalogue">
-    <label class="sr-only" for="search">Search materials</label>
-    <input id="search" type="search" name="q" placeholder="Search materials" maxlength="100" autocomplete="off">
+  {mobile_navigation}
+  {wordmark}
+  {navigation}
+  <form class="global-search" role="search" action="{search_path}" data-search-api="{stationery.SEARCH if stationery_page else '/api/storefront/search'}">
+    <label class="sr-only" for="search">{search_label}</label>
+    <input id="search" type="search" name="q" placeholder="{search_label}" maxlength="100" autocomplete="off">
     <button aria-label="Search">{icon('search')}</button>
     <ul id="suggestions" role="listbox" aria-label="Product suggestions" hidden></ul>
     <span class="sr-only" id="search-status" role="status"></span>
@@ -311,22 +353,23 @@ def layout(title, description, path, content, origin, notice='', noindex=False, 
     <a href="/shop/cart" class="bag" aria-label="Cart">{icon('bag')} <span data-cart-count>0</span></a>
   </div>
 </div>
+<div class="department-categories"><nav class="wrap category-nav" data-category-navigation
+  aria-label="{'Stationery categories' if stationery_page else 'Shop categories'}">{categories}</nav></div>
 </header>
 {'<p class="catalogue-preview-note">Catalogue preview · Browse materials and search the demo range.</p>' if CATALOGUE_PREVIEW else ''}
 <div data-store-announcement>{notice}</div>
 <main id="main">{content}</main>
 <div data-meadow-footer data-demo-checkout="{int(demo)}"><footer class="site-footer meadow-fallback">
   <div class="wrap footer-grid">
-    <div><a href="/shop" class="wordmark"><span>Gupta</span><small>Art Store and Stationary</small></a>
+    <div>{wordmark}
     <p>Art materials and stationery for your workbench.</p>
     <a class="footer-instagram" href="https://www.instagram.com/gupta_artstore/"><img src="/storefront/instagram.svg" alt="" width="20" height="20">Follow us on Instagram</a></div>
     <nav aria-label="Footer categories">{nav_links()}</nav>
-    <nav aria-label="Store information"><a href="/shop/catalogue">All materials</a>{member_link}<a href="/shop/about">About this demo</a><a href="/shop/privacy">Privacy policy</a><a href="/shop/refunds">Refund policy</a></nav>
+    <nav aria-label="Store information"><a href="/shop/catalogue">All materials</a>{stationery_link}{member_link}<a href="/shop/about">About this demo</a><a href="/shop/privacy">Privacy policy</a><a href="/shop/refunds">Refund policy</a></nav>
   </div>
   <div class="wrap footer-bottom"><span>{BRAND}</span><span>Demo catalogue</span></div>
 </footer></div>
 <a href="#" class="back-to-top" data-back-top hidden>Back to top {icon('up') if 'up' in ICONS else '<span aria-hidden="true">↑</span>'}</a>
-<div class="studio-loading" data-studio-loading hidden><span class="art-loader" aria-hidden="true"></span><p role="status">Opening the studio…</p></div>
 <p class="sr-only" id="store-status" role="status"></p>
 </body></html>'''
 
@@ -415,6 +458,14 @@ def studio_stage(key=''):
 </section>'''
 
 
+def privilege_strip():
+    return f'''<section class="wrap section home-privilege" aria-labelledby="privilege-heading">
+<div class="membership-strip"><div><p class="commerce-label">Gupta Privilege</p>
+<h2 id="privilege-heading">Member prices for your next project</h2>
+<p>Get a Privilege card free with a qualifying purchase above <strong class="offer-number">₹{QUALIFYING_SPEND // 100:,}</strong>, or buy one for <strong class="offer-number">₹{MEMBER_PRICE // 100:,}</strong>.</p></div>
+<a class="button" href="/shop/privilege">Explore membership</a></div></section>'''
+
+
 def studio_page(products, key='', params=None, ranked=None, demo=False):
     params = params or {}
     selected = params.get('subcategory', [''])[0]
@@ -441,11 +492,7 @@ def studio_page(products, key='', params=None, ranked=None, demo=False):
         else:
             content = '<section class="wrap section">' + empty('This shelf is empty', 'There are currently no materials in this collection.') + '</section>'
         if demo:
-            content = f'''<section class="wrap section home-privilege" aria-labelledby="privilege-heading">
-<div class="membership-strip"><div><p class="commerce-label">Gupta Privilege</p>
-<h2 id="privilege-heading">Member prices for your next project</h2>
-<p>Get a Privilege card free with a qualifying purchase above <strong class="offer-number">₹{QUALIFYING_SPEND // 100:,}</strong>, or buy one for <strong class="offer-number">₹{MEMBER_PRICE // 100:,}</strong>.</p></div>
-<a class="button" href="/shop/privilege">Explore membership</a></div></section>''' + content
+            content = privilege_strip() + content
         page = 1
     return (f'<div id="studio" data-category="{key}">{studio_stage(key)}'
             f'<div class="studio-content" data-category="{key}">'
@@ -912,7 +959,7 @@ def storefront_response(path, query, connect, origin, raw_cookies=''):
     if path == '/robots.txt':
         rules = 'User-agent: *\nDisallow: /api/\nDisallow: /legacy-shop\n'
         return response(200, rules + f'Sitemap: {origin}/sitemap.xml\n', 'text/plain')
-    if (path not in {'/sitemap.xml', '/api/storefront/products', '/api/storefront/search', SHOP}
+    if (path not in {'/sitemap.xml', '/api/storefront/products', '/api/storefront/search', stationery.SEARCH, SHOP}
             and not path.startswith(SHOP + '/')):
         return None
     if len(query) > 6500:
@@ -921,18 +968,34 @@ def storefront_response(path, query, connect, origin, raw_cookies=''):
         return response(303, '', headers=[('Cache-Control', 'no-store'),
                         ('Location', '/shop/sign-up?' + urlencode({'next': path}))])
     params = parse_qs(query)
-    if path == '/api/storefront/products':
-        ids = params.get('ids', [''])[0]
-        if not re.fullmatch(rf'{PRODUCT_ID}(?:,{PRODUCT_ID}){{0,99}}', ids):
-            return json_response({'error':'Provide up to 100 product IDs.'}, 400)
-        ids = tuple(map(int, ids.split(',')))
-        if any(product_id > MAX_PRODUCT_ID for product_id in ids):
-            return json_response({'error':'Invalid product ID.'}, 400)
-        placeholders = ','.join('?' for _ in ids)
+    if path == stationery.SEARCH:
+        return json_response(stationery.suggestions(params.get('q', [''])[0][:100]))
+    if path == stationery.STATIONERY or path.startswith(stationery.STATIONERY + '/'):
         with closing(connect()) as c:
-            rows = c.execute(f'SELECT {PRODUCT_FIELDS} FROM products WHERE archived=0 AND id IN ({placeholders})', ids)
-            products = [public_product(catalogue_product(row)) for row in rows]
-        apply_hosted_stock(products, only_ids=True)
+            notice = announcement(c)
+        demo = demo_enabled()
+        membership = privilege_strip() if demo and path.rstrip('/') == stationery.STATIONERY else ''
+        status, title, content = stationery.page(path, params, price, save_button, membership)
+        return response(status, layout(title, 'Browse stationery, premium pens and the Gupta heritage collection.',
+                                       path, content, origin, notice=notice, noindex=True, demo=demo),
+                        headers=[('Cache-Control', 'no-cache')])
+    if path == '/api/storefront/products':
+        ids = params.get('ids', [''])[0].split(',')
+        if len(ids) > 100 or not all(re.fullmatch(rf'{PRODUCT_ID}|{stationery.CART_ID}', value) for value in ids):
+            return json_response({'error':'Provide up to 100 product IDs.'}, 400)
+        art_ids = tuple(int(value) for value in ids if value.isascii() and value.isdecimal())
+        if any(product_id > MAX_PRODUCT_ID for product_id in art_ids):
+            return json_response({'error':'Invalid product ID.'}, 400)
+        products = []
+        if art_ids:
+            placeholders = ','.join('?' for _ in art_ids)
+            with closing(connect()) as c:
+                rows = c.execute(f'SELECT {PRODUCT_FIELDS} FROM products WHERE archived=0 AND id IN ({placeholders})', art_ids)
+                products = [public_product(catalogue_product(row)) for row in rows]
+            apply_hosted_stock(products, only_ids=True)
+        stationery_ids = {value for value in ids if value.startswith('stationery:')}
+        if stationery_ids:
+            products.extend(stationery.saved_products(stationery_ids))
         return json_response({'products': products})
     with closing(connect()) as c:
         query_text = params.get('q', [''])[0].strip()[:100]
@@ -998,8 +1061,8 @@ def storefront_response(path, query, connect, origin, raw_cookies=''):
         title = 'Your cart' if path.endswith('/cart') else 'Your wishlist'
         view = 'cart' if path.endswith('/cart') else 'wishlist'
         noindex = True
-        content = f'''<section class="wrap page">{trail(title)}<h1>{title}</h1>
-<p class="saved-intro">{('Review your materials before checkout.' if demo else 'Save materials here while you browse the demo catalogue.') if view == 'cart' else 'Keep materials you want to find again.'}</p>
+        content = f'''<section class="wrap page{' cart-page' if view == 'cart' else ''}">{trail(title)}<h1>{title}</h1>
+{'<p class="saved-intro">Keep materials you want to find again.</p>' if view == 'wishlist' else ''}
 <div data-view="{view}" data-demo-checkout="{int(demo)}" aria-busy="true"><p>Loading your {view}…</p></div>
 <noscript><p>Enable JavaScript to see the items saved in this browser.</p><a href="/shop/catalogue">Browse materials</a></noscript></section>'''
     elif demo and path in {SHOP + '/checkout', SHOP + '/privilege'}:
@@ -1022,7 +1085,7 @@ def storefront_response(path, query, connect, origin, raw_cookies=''):
         title = 'Refund policy'
         content = f'''<section class="wrap page prose">{trail(title)}<h1>{title}</h1>
 <p>Checkout and Privilege card purchases on this demo use simulated payments. Demo orders are never shipped and do not generate a charge or refund.</p>
-<h2>Purchases made at the store</h2><p>For a purchase made outside this demo, ask Gupta Art Store and Stationary about the terms that apply to your receipt.</p></section>'''
+<h2>Purchases made at the store</h2><p>For a purchase made outside this demo, ask {BRAND} about the terms that apply to your receipt.</p></section>'''
     else:
         match = re.fullmatch(rf'/shop/product/[a-z0-9-]+-({PRODUCT_ID})', path)
         product = next((p for p in products if match and p['id'] == match[1]), None)

@@ -23,7 +23,7 @@ export default function MeadowRiseFooter({ demoCheckout }: { demoCheckout: boole
   const columns = [
     { title: "Paint & make", links: categories.slice(0, 4).map(([name, slug]) => [name, "/shop/category/" + slug]) },
     { title: "Draw & design", links: categories.slice(4).map(([name, slug]) => [name, "/shop/category/" + slug]) },
-    { title: "The store", links: [["Catalogue", "/shop/catalogue"], ["Your account", "/shop/account"],
+    { title: "The store", links: [["Art catalogue", "/shop/catalogue"], ["Stationery", "/shop/stationery"], ["Your account", "/shop/account"],
       ["Wishlist", "/shop/wishlist"], ["Cart", "/shop/cart"], ["About this demo", "/shop/about"],
       ...(demoCheckout ? [["Gupta Privilege", "/shop/privilege"]] : [])] },
   ]
@@ -57,7 +57,10 @@ export default function MeadowRiseFooter({ demoCheckout }: { demoCheckout: boole
       <div className="wrap mrf-wrap">
         <div className="mrf-grid">
           <div className="mrf-brand">
-            <a href="/shop" className="wordmark"><span>Gupta</span><small>Art Store and Stationary</small></a>
+            <a href="/shop" className="wordmark" aria-label="Gupta Art and Stationery, home">
+              <img className="wordmark-logo" src="/storefront/gupta-1916.svg" alt="" width="54" height="54" />
+              <div><span>Gupta</span><small>Art and Stationery</small></div>
+            </a>
             <p>Art materials and stationery for your workbench.</p>
             <a className="footer-instagram" href="https://www.instagram.com/gupta_artstore/">
               <img src="/storefront/instagram.svg" alt="" width="20" height="20" />
@@ -74,7 +77,7 @@ export default function MeadowRiseFooter({ demoCheckout }: { demoCheckout: boole
           </nav>
         </div>
         <div className="mrf-bottom">
-          <p>© {new Date().getFullYear()} Gupta Art Store and Stationary</p>
+          <p>© {new Date().getFullYear()} Gupta Art and Stationery</p>
           <a href="/shop/privacy">Privacy policy</a>
           <a href="/shop/refunds">Refund policy</a>
         </div>
